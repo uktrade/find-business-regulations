@@ -7,6 +7,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
+from app.core.forms import RegulationSearchForm
 from app.search.config import SearchDocumentConfig
 from app.search.utils.search import search, search_database
 
@@ -68,11 +69,14 @@ def search_django(request: HttpRequest):
 
     Renders the Django based search page.
     """
+    form = RegulationSearchForm(request.GET)
+
     context = {
         "service_name": settings.SERVICE_NAME_SEARCH,
+        "form": form,
     }
-
     context = search(context, request)
+
     return render(request, template_name="django-fbr.html", context=context)
 
 

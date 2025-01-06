@@ -150,7 +150,7 @@ def search(
     logger.info("received search request: %s", request)
     start_time = time.time()
 
-    search_query = request.GET.get("query", "")
+    search_query = request.GET.get("query", request.GET.get("search", ""))
     document_types = request.GET.getlist("document_type", [])
     offset = request.GET.get("page", "1")
     offset = int(offset) if offset.isdigit() else 1
