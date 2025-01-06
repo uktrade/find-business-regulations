@@ -112,6 +112,7 @@ def paginate(
 
     start_time = time.time()
     context["paginator"] = paginator
+    context["paginated_document_results"] = paginated_documents
     context["results"] = paginated_documents_json
     context["results_count"] = len(paginated_documents)
     context["is_paginated"] = paginator.num_pages > 1
