@@ -100,6 +100,21 @@ def search_react(request: HttpRequest) -> HttpResponse:
     return render(request, template_name="react-fbr.html", context=context)
 
 
+def _get_base_url(request: HttpRequest) -> str:
+    """
+    Get the base URL from the current request dynamically.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        str: The base URL (e.g., http://localhost:8081 or
+             https://staging.example.com)
+    """
+    base_url = f"{request.scheme}://{request.get_host()}"
+    return base_url
+
+
 def download_csv(request):
     """
     Download CSV view.
@@ -112,8 +127,8 @@ def download_csv(request):
 
     try:
         response_data = search(context, request, ignore_pagination=True)
-
         logger.info(f"response_data length: {len(response_data)}")
+        base_url = _get_base_url(request)
 
         search_results = []
         for result in response_data:
@@ -124,6 +139,7 @@ def download_csv(request):
                     "description": result.description,
                     "type": result.type,
                     "date_valid": result.date_valid,
+                    "document_url": f"{base_url}/document/{result.id}",
                 }
             )
 

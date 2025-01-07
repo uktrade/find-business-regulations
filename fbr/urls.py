@@ -109,7 +109,9 @@ urlpatterns = [
     path("api/", include(router.urls)),
     path("", search_views.search_react, name="search_react"),
     path("nojs/", search_views.search_django, name="search_django"),
+    # This is the URL for downloading the search results in CSV format
     path("download_csv/", search_views.download_csv, name="csvdata"),
+    path("nojs/download_csv/", search_views.download_csv, name="csvdata"),
     # If we choose to have a start page with green button, this is it:
     # path("", core_views.home, name="home"),
     path("document/<str:id>", search_views.document, name="document"),
