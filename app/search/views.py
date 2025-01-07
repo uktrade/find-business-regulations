@@ -121,13 +121,15 @@ def download_csv(request):
 
     Handles the GET request to download the search results in CSV format.
     """
+    logger.debug("building CSV downloadable file")
     context = {
         "service_name": settings.SERVICE_NAME_SEARCH,
     }
 
     try:
+        logger.debug("searching for all documents")
         response_data = search(context, request, ignore_pagination=True)
-        logger.info(f"response_data length: {len(response_data)}")
+        logger.debug(f"response_data length: {len(response_data)}")
         base_url = _get_base_url(request)
 
         search_results = []

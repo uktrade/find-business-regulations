@@ -8,4 +8,4 @@ class CacheConfig(AppConfig):
 
     def ready(self):
         # Custom app-specific initialization
-        print("Cache app is ready!")
+        print("cache app is ready!")
