@@ -147,7 +147,9 @@ def search_database(config: SearchDocumentConfig):
 def search(
     context: dict, request: HttpRequest, ignore_pagination=False
 ) -> dict | QuerySet[DataResponseModel]:
-    logger.info("received search request: %s", request)
+    logger.debug("received search request: %s", request)
+    logger.debug("received search context: %s", context)
+    logger.debug("ignore_pagination: %s", ignore_pagination)
     start_time = time.time()
 
     search_query = request.GET.get("query", request.GET.get("search", ""))
@@ -176,14 +178,14 @@ def search(
 
     # Search across specific fields
     results = search_database(config)
-
-    logger.info("search results from database: %s", results)
+    logger.debug("search results from database: %s", results)
 
     if ignore_pagination:
-        logger.info("ignoring pagination")
+        logger.info("ignoring pagination and returning results")
         return results
 
     # convert search_results into json
+    logger.debug("building context for search results-pagination...")
     pag_start_time = time.time()
     context = paginate(context, config, results)
     pag_end_time = time.time()
@@ -199,7 +201,7 @@ def search(
         f"{round(end_time - start_time, 2)} seconds"
     )
 
-    logger.info("search results from context: %s", context)
+    logger.debug("search results from context: %s", context)
     return context
 
 
@@ -224,7 +226,6 @@ def get_publisher_names():
             )
             .distinct()
         )
-
     except Exception as e:
         logger.error(f"error getting publisher names: {e}")
         logger.debug("returning empty list of publishers")

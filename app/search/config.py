@@ -71,37 +71,56 @@ class SearchDocumentConfig:
         self.sort_by = sort_by
         self.id = id
 
-        logger.info(f"document_types from request: {self.document_types}")
-        logger.info(f"publisher_names from request: {self.publisher_names}")
+        logger.debug(f"document_types from request: {self.document_types}")
+        logger.debug(f"publisher_names from request: {self.publisher_names}")
 
         self._has_been_sanitized = False
 
     def sanitize_all_if_needed(self):
+        logger.debug("sanitizing search parameters")
         if self._has_been_sanitized:
+            logger.debug("search parameters have already been sanitized")
             return
 
         # Sanitize document types
         self.search_query = sanitize_input(self.search_query)
+        logger.debug(f"search_query after sanitization: {self.search_query}")
 
         # Sanitize document_types
         if self.document_types:
+            logger.debug(
+                f"document_types before sanitization: {self.document_types}"
+            )
             self.document_types = [
                 sanitize_input(doc_type) for doc_type in self.document_types
             ]
+            logger.debug(
+                f"document_types after sanitization: {self.document_types}"
+            )
 
         # Sanitize publisher names
         if self.publisher_names:
+            logger.debug(
+                f"publisher_names before sanitization: {self.publisher_names}"
+            )
             self.publisher_names = [
                 sanitize_input(pub_name) for pub_name in self.publisher_names
             ]
+            logger.debug(
+                f"publisher_names after sanitization: {self.publisher_names}"
+            )
 
         # Sanitize sort_by
         if self.sort_by:
+            logger.debug(f"sort_by before sanitization: {self.sort_by}")
             self.sort_by = sanitize_input(self.sort_by)
+            logger.debug(f"sort_by after sanitization: {self.sort_by}")
 
         # Sanitize id
         if self.id:
+            logger.debug(f"id before sanitization: {self.id}")
             self.id = sanitize_input(self.id)
+            logger.debug(f"id after sanitization: {self.id}")
 
         self._has_been_sanitized = True
 
@@ -134,6 +153,8 @@ class SearchDocumentConfig:
             if self.sort_by not in ["recent", "relevance"]:
                 logger.error("sort_by must be 'recent' or 'relevance'")
                 return False
+
+        logger.debug("search parameters are valid")
         return True
 
     def print_to_log(self):
