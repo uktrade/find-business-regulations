@@ -318,3 +318,11 @@ COOKIE_ACCEPTED_GA_NAME: str = "accepted_ga_cookies"
 GOOGLE_ANALYTICS_TAG_MANAGER_ID = env(
     "GOOGLE_ANALYTICS_TAG_MANAGER_ID", default=None
 )
+
+# GOV Notify
+GOVUK_NOTIFY_API_KEY = env.str("GOVUK_NOTIFY_API_KEY", default=None)
+GOVUK_NOTIFY_TEMPLATE_ID = env.str("GOVUK_NOTIFY_TEMPLATE_ID", default=None)
+GOVUK_NOTIFY_TEST_EMAIL = env.str("GOVUK_NOTIFY_TEST_EMAIL", default=None)
+
+# Suppress email sending for testing, local dev etc
+SUPPRESS_NOTIFY = env.bool("SUPPRESS_NOTIFY", default=False)

@@ -131,6 +131,7 @@ urlpatterns = [
         core_views.hide_cookie_banner,
         name="hide-cookie-banner",
     ),
+    path("test-email/", core_views.test_email, name="test-email"),
     # path("search/", orp_views.search, name="search"),
 ]
 

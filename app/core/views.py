@@ -7,6 +7,7 @@ from django.views.decorators.http import require_http_methods, require_safe
 
 from .cookies import get_ga_cookie_preference, set_ga_cookie_policy
 from .forms import CookiePreferenceForm
+from .gov_notify import send_test_email
 from .healthcheck import application_service_health
 
 
@@ -30,6 +31,15 @@ def home(request: HttpRequest) -> HttpResponse:
         "service_name": f"{settings.SERVICE_NAME} - Development",
     }
     return render(request, template_name="home.html", context=context)
+
+
+@require_http_methods(["GET"])
+def test_email(request):
+    try:
+        response = send_test_email()
+        return HttpResponse(f"Email sent successfully: {response}")
+    except Exception as e:
+        return HttpResponse(f"Error sending email: {e}", status=500)
 
 
 @require_safe
