@@ -32,7 +32,12 @@ RUN apt install -y curl && \
   curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
   apt install -y nodejs
 
+RUN apt install -y openssl
+
 WORKDIR /app
+
+# Install Django Extensions
+RUN pip install django-extensions
 
 RUN pip install poetry
 

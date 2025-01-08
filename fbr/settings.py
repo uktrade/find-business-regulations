@@ -53,6 +53,7 @@ ENVIRONMENT = env(
 
 # Application definition
 DJANGO_APPS = [
+    "django_extensions",
     "django_celery_beat",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -318,3 +319,20 @@ COOKIE_ACCEPTED_GA_NAME: str = "accepted_ga_cookies"
 GOOGLE_ANALYTICS_TAG_MANAGER_ID = env(
     "GOOGLE_ANALYTICS_TAG_MANAGER_ID", default=None
 )
+
+
+# Security settings
+SECURE_CONTENT_TYPE_NOSNIFF = (
+    True  # Prevents the browser from guessing the MIME type
+)
+SECURE_BROWSER_XSS_FILTER = True  # Enables the browser's XSS protection filter
+
+# Additional recommended security settings
+SECURE_HSTS_SECONDS = 31536000  # Enable HSTS with a 1-year duration
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Other security headers and settings (if using HTTPS in production)
+SECURE_SSL_REDIRECT = True  # Redirect all HTTP requests to HTTPS
+SESSION_COOKIE_SECURE = True  # Ensure cookies are only sent over HTTPS
+CSRF_COOKIE_SECURE = True  # Ensure CSRF tokens are only sent over HTTPS
