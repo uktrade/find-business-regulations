@@ -16,27 +16,6 @@ class EmailSendError(Exception):
     """
 
 
-def send_test_email():
-    api_key = settings.GOVUK_NOTIFY_API_KEY
-    template_id = settings.GOVUK_NOTIFY_TEMPLATE_ID
-    email_address = settings.GOVUK_NOTIFY_TEST_EMAIL
-
-    if not api_key or not template_id or not email_address:
-        raise ValueError(
-            "GOV.UK Notify credentials are not set in the environment"
-        )
-
-    notifications_client = NotificationsAPIClient(api_key)
-
-    response = notifications_client.send_email_notification(
-        email_address=email_address,
-        template_id=template_id,
-        personalisation={"name": "Test User", "link": "https://example.com"},
-    )
-
-    return response
-
-
 def send_email_notification(
     email_address, template_id, personalisation=None, reference=None
 ) -> dict:
