@@ -43,7 +43,19 @@ SECRET_KEY = env(
     "DJANGO_SECRET_KEY", default="find-business-regulations-secret-key"
 )
 
+# Only init sentry if the SENTRY_DSN is provided
+if os.environ.get("SENTRY_DSN"):
+    import sentry_sdk
+
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        os.environ.get("SENTRY_DSN"),
+        integrations=[DjangoIntegration()],
+    )
+
 DEBUG = env("DEBUG", default=False)
+
 DJANGO_ADMIN = env("DJANGO_ADMIN", default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost"])
 
@@ -272,6 +284,13 @@ LOGGING: dict[str, Any] = {
         },
     },
 }
+
+if os.environ.get("SENTRY_DSN"):
+    LOGGING["loggers"]["sentry_sdk"] = {
+        "level": "ERROR",
+        "handlers": ["asim"],
+        "propagate": False,
+    }
 
 # Django Log Formatter ASIM settings
 # See https://github.com/uktrade/django-log-formatter-asim#settings
