@@ -51,6 +51,7 @@ SECRET_KEY = env(
 SENTRY_DSN = os.environ.get("SENTRY_DSN", None)
 if SENTRY_DSN:
     sentry_sdk.init(dsn=SENTRY_DSN, integrations=[DjangoIntegration()])
+    logging.getLogger(__name__).info("SENTRY_DSN set. Sentry is enabled.")
 else:
     logging.getLogger(__name__).info("SENTRY_DSN not set. Sentry is disabled.")
 
@@ -292,6 +293,10 @@ if SENTRY_DSN:
         "handlers": ["asim"],
         "propagate": False,
     }
+else:
+    logging.getLogger(__name__).info(
+        "sentry not enabled. skipping sentry logging config"
+    )
 
 # Django Log Formatter ASIM settings
 # See https://github.com/uktrade/django-log-formatter-asim#settings
