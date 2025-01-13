@@ -33,7 +33,7 @@ using the dev environment, however other environments can be used as well):
 
 - Single word
 ```python
-  @patch("app.search.utils.search.SearchQuery", autospec=True)
+    @patch("app.search.utils.search.SearchQuery", autospec=True)
     def test_single_word_query(self, mock_search_query):
         result = create_search_query("test")
         mock_search_query.assert_called_with("test", search_type="plain")
@@ -42,22 +42,22 @@ using the dev environment, however other environments can be used as well):
 
 - SQL Injection Prevention
 ```python
-  @patch("app.search.utils.search.SearchQuery", autospec=True)
-def test_sql_injection_prevention(self, mock_search_query):
-    malicious_input = "test'; DROP TABLE users; --"
-    sanitized_query = sanitize_input(malicious_input)
-    config = SearchDocumentConfig(search_query=sanitized_query)
-    result = create_search_query(config.search_query)
-    calls = [
-        call("test", search_type="plain"),
-        call("DROP", search_type="plain"),
-        call("TABLE", search_type="plain"),
-        call("users", search_type="plain"),
-    ]
-    mock_search_query.assert_has_calls(calls, any_order=False)
-    self.assertIsNotNone(result)
-    with self.assertRaises(AssertionError):
-        mock_search_query.assert_called_with("DROP TABLE users;")
+    @patch("app.search.utils.search.SearchQuery", autospec=True)
+    def test_sql_injection_prevention(self, mock_search_query):
+        malicious_input = "test'; DROP TABLE users; --"
+        sanitized_query = sanitize_input(malicious_input)
+        config = SearchDocumentConfig(search_query=sanitized_query)
+        result = create_search_query(config.search_query)
+        calls = [
+            call("test", search_type="plain"),
+            call("DROP", search_type="plain"),
+            call("TABLE", search_type="plain"),
+            call("users", search_type="plain"),
+        ]
+        mock_search_query.assert_has_calls(calls, any_order=False)
+        self.assertIsNotNone(result)
+        with self.assertRaises(AssertionError):
+            mock_search_query.assert_called_with("DROP TABLE users;")
   ```
 
 - Phase Search Query
