@@ -134,6 +134,7 @@ urlpatterns = [
         name="hide-cookie-banner",
     ),
     # path("search/", orp_views.search, name="search"),
+    path("test-sentry/", core_views.test_sentry, name="test-sentry"),
 ]
 
 if settings.DJANGO_ADMIN:
