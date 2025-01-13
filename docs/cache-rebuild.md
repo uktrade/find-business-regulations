@@ -11,7 +11,7 @@ The `make setup_local_force_rebuild` command is a simple way to rebuild the cach
 The `make` command is a build automation tool that automatically builds executable programs and libraries from source
 code by reading files called `Makefiles` which specify how to derive the target program.
 
-However, to rebuild the cache onlly, you can use the `make rebuild_cache` command.
+However, to rebuild the cache only, you can use the `make rebuild_cache` command.
 
 ## Rebuild the cache on environment using the automated celery task
 The cache can be rebuilt on the environment using the automated celery task.
