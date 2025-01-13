@@ -14,6 +14,7 @@ as we want to get an `ImproperlyConfigured` exception. This highlights badly
 configured deployments.
 """
 
+import logging
 import os
 
 from pathlib import Path
@@ -21,9 +22,11 @@ from typing import Any
 
 import dj_database_url
 import environ
+import sentry_sdk
 
 from dbt_copilot_python.database import database_url_from_env
 from django_log_formatter_asim import ASIMFormatter
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Define the root directory (i.e. <repo-root>)
 root = environ.Path(__file__) - 4  # i.e. Repository root
@@ -44,15 +47,12 @@ SECRET_KEY = env(
 )
 
 # Only init sentry if the SENTRY_DSN is provided
-if os.environ.get("SENTRY_DSN"):
-    import sentry_sdk
-
-    from sentry_sdk.integrations.django import DjangoIntegration
-
-    sentry_sdk.init(
-        os.environ.get("SENTRY_DSN"),
-        integrations=[DjangoIntegration()],
-    )
+# Sentry set up:
+SENTRY_DSN = os.environ.get("SENTRY_DSN", None)
+if SENTRY_DSN:
+    sentry_sdk.init(dsn=SENTRY_DSN, integrations=[DjangoIntegration()])
+else:
+    logging.getLogger(__name__).info("SENTRY_DSN not set. Sentry is disabled.")
 
 DEBUG = env("DEBUG", default=False)
 
@@ -285,7 +285,8 @@ LOGGING: dict[str, Any] = {
     },
 }
 
-if os.environ.get("SENTRY_DSN"):
+if SENTRY_DSN:
+    logging.getLogger(__name__).info("added sentry to logging config")
     LOGGING["loggers"]["sentry_sdk"] = {
         "level": "ERROR",
         "handlers": ["asim"],
