@@ -116,3 +116,4 @@ webpack-stats.json
 
 # Other
 .DS_Store
+/key.pem
