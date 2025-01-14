@@ -32,19 +32,6 @@ def home(request: HttpRequest) -> HttpResponse:
     return render(request, template_name="home.html", context=context)
 
 
-@require_http_methods(["GET"])
-def test_sentry(request):
-    import logging
-
-    logger = logging.getLogger(__name__)
-
-    logger.info("sentry: [INFO] find business regulations test message")
-    logger.error("sentry: [ERROR] find business regulations test message")
-    logger.warning("sentry: [WARNING] find business regulations test message")
-    logger.debug("sentry: [DEBUG] find business regulations test message")
-    return HttpResponse("Log message written", status=200)
-
-
 @require_safe
 def health_check(request: HttpRequest) -> HttpResponse:
     """Healthcheck endpoint.
