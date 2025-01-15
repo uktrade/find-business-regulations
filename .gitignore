@@ -117,3 +117,11 @@ webpack-stats.json
 # Other
 .DS_Store
 /key.pem
+!/-out
+
+!/cert.crt
+
+!/cert.key
+
+!/cert.pem
+!/db.sqlite3

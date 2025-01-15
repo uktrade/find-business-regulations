@@ -29,8 +29,5 @@ else
 fi
 
 # Run Django server with SSL support
-echo "Starting Django with HTTPS..."
+echo "Starting server with HTTPS..."
 exec python manage.py runserver_plus 0.0.0.0:8080 --cert-file "$CERT_FILE" --key-file "$KEY_FILE"
-
-#echo "Starting server"
-#python manage.py runserver 0.0.0.0:8080
