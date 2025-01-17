@@ -40,9 +40,7 @@ def feedback_view(request):
         if form.is_valid():
             name = form.cleaned_data["name"]
             message = form.cleaned_data["message"]
-            email_address = (
-                settings.GOVUK_NOTIFY_TEST_EMAIL
-            )  # Set email address
+            email_address = settings.GOVUK_NOTIFY_EMAIL  # Set email address
 
             try:
                 response = send_email_notification(
