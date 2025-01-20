@@ -27,8 +27,8 @@ def rebuild_cache():
         start = time.time()
         clear_all_documents()
         config = SearchDocumentConfig(search_query="", timeout=2)
-        Legislation().build_cache(config)
         PublicGateway().build_cache(config)
+        Legislation().build_cache(config)
         end = time.time()
         message = {
             "message": "rebuilt cache",

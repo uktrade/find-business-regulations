@@ -198,7 +198,7 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
 CELERY_RESULT_EXTENDED = True
 CELERY_TASK_TIME_LIMIT = (
-    1800  # Maximum runtime for a task in seconds (e.g., 1800/60 = 30 minutes)
+    3600  # Maximum runtime for a task in seconds (e.g., 3600/60 = 60 minutes)
 )
 CELERY_TASK_SOFT_TIME_LIMIT = (
     270  # Optional: Grace period before forced termination
