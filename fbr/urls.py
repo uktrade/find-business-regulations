@@ -13,8 +13,6 @@ from django.urls import include, path
 import app.core.views as core_views
 import app.search.views as search_views
 
-from app.search.models import DataResponseModel
-from app.search.utils.documents import clear_all_documents
 from app.search.utils.search import get_publisher_names, search
 
 urls_logger = logging.getLogger(__name__)
@@ -76,40 +74,19 @@ class PublishersViewSet(viewsets.ViewSet):
             )
 
 
-class TempCacheDataResponseViewSet(viewsets.ViewSet):
-    @action(detail=False, methods=["get"], url_path="cache")
-    def read_cachetempdata(self, request, *args, **kwargs):
-        try:
-            from fbr.tempcache import CACHETEMPDATA
-
-            clear_all_documents()
-
-            for record in CACHETEMPDATA:
-                DataResponseModel.objects.create(**record)
-
-            return Response(
-                {"message": "data inserted successfully"},
-                status=status.HTTP_201_CREATED,
-            )
-        except Exception as e:
-            return Response(
-                {"message": f"error reading CACHETEMPDATA: {e}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
 
 router.register(r"v1", DataResponseViewSet, basename="search")
 router.register(r"v1/retrieve", PublishersViewSet, basename="publishers")
-router.register(r"v1/temp", TempCacheDataResponseViewSet, basename="cache")
 
 urlpatterns = [
     path("api/", include(router.urls)),
     path("", search_views.search_react, name="search_react"),
     path("nojs/", search_views.search_django, name="search_django"),
+    # This is the URL for downloading the search results in CSV format
     path("download_csv/", search_views.download_csv, name="csvdata"),
+    path("nojs/download_csv/", search_views.download_csv, name="csvdata"),
     # If we choose to have a start page with green button, this is it:
     # path("", core_views.home, name="home"),
     path("document/<str:id>", search_views.document, name="document"),

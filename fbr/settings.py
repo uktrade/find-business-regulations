@@ -14,6 +14,7 @@ as we want to get an `ImproperlyConfigured` exception. This highlights badly
 configured deployments.
 """
 
+import logging
 import os
 
 from pathlib import Path
@@ -21,9 +22,11 @@ from typing import Any
 
 import dj_database_url
 import environ
+import sentry_sdk
 
 from dbt_copilot_python.database import database_url_from_env
 from django_log_formatter_asim import ASIMFormatter
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Define the root directory (i.e. <repo-root>)
 root = environ.Path(__file__) - 4  # i.e. Repository root
@@ -43,7 +46,22 @@ SECRET_KEY = env(
     "DJANGO_SECRET_KEY", default="find-business-regulations-secret-key"
 )
 
+# Only init sentry if the SENTRY_DSN is provided
+# TODO: add SENTRY_TRACES_SAMPLE_RATE to secrets default value of 0.0
+# Sentry set up:
+SENTRY_DSN = os.environ.get("SENTRY_DSN", None)
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=env("SENTRY_TRACES_SAMPLE_RATE", default=1.0),
+    )
+    logging.getLogger(__name__).info("SENTRY_DSN set. Sentry is enabled.")
+else:
+    logging.getLogger(__name__).info("SENTRY_DSN not set. Sentry is disabled.")
+
 DEBUG = env("DEBUG", default=False)
+
 DJANGO_ADMIN = env("DJANGO_ADMIN", default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost"])
 
@@ -53,6 +71,7 @@ ENVIRONMENT = env(
 
 # Application definition
 DJANGO_APPS = [
+    "django_extensions",
     "django_celery_beat",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -179,7 +198,7 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
 CELERY_RESULT_EXTENDED = True
 CELERY_TASK_TIME_LIMIT = (
-    900  # Maximum runtime for a task in seconds (e.g., 900/60 = 15 minutes)
+    3600  # Maximum runtime for a task in seconds (e.g., 3600/60 = 60 minutes)
 )
 CELERY_TASK_SOFT_TIME_LIMIT = (
     270  # Optional: Grace period before forced termination
@@ -306,7 +325,7 @@ HOSTNAME_MAP = {
     "local": "http://localhost:8081",
     "dev": "https://dev.find-business-regulations.uktrade.digital/",
     "staging": "https://staging.find-business-regulations.uktrade.digital/",
-    "prod": "https://find-business-regulations.uktrade.digital/",
+    "prod": "https://find-business-regulations.private-beta.service.trade.gov.uk/",
 }
 
 HOSTNAME = HOSTNAME_MAP.get(ENVIRONMENT.lower(), HOSTNAME_MAP["prod"])
@@ -326,3 +345,19 @@ GOVUK_NOTIFY_EMAIL = env.str("GOVUK_NOTIFY_EMAIL", default=None)
 
 # Suppress email sending for testing, local dev etc
 SUPPRESS_NOTIFY = env.bool("SUPPRESS_NOTIFY", default=False)
+
+# Security settings
+SECURE_CONTENT_TYPE_NOSNIFF = (
+    True  # Prevents the browser from guessing the MIME type
+)
+SECURE_BROWSER_XSS_FILTER = True  # Enables the browser's XSS protection filter
+
+# Additional recommended security settings
+SECURE_HSTS_SECONDS = 31536000  # Enable HSTS with a 1-year duration
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Other security headers and settings (if using HTTPS in production)
+SECURE_SSL_REDIRECT = True  # Redirect all HTTP requests to HTTPS
+SESSION_COOKIE_SECURE = True  # Ensure cookies are only sent over HTTPS
+CSRF_COOKIE_SECURE = True  # Ensure CSRF tokens are only sent over HTTPS

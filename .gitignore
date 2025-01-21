@@ -114,5 +114,10 @@ npm-debug.log*
 /front_end/webpack_bundles
 webpack-stats.json
 
+# SSL
+/ssl/certificate.crt
+/ssl/private_key.key
+-out
+
 # Other
 .DS_Store

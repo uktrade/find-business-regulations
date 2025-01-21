@@ -43,18 +43,19 @@ def document(request: HttpRequest, id) -> HttpResponse:
 
         # Parse the related_legislation field
         related_legislation_str = context["result"].related_legislation
-        try:
-            related_legislation_double_quotes = (
-                related_legislation_str.replace("'", '"')
-            )
-            related_legislation_json = json.loads(
-                related_legislation_double_quotes
-            )
-            context["result"].related_legislation = related_legislation_json
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON decoding error: {e}")
-            context["result"].related_legislation = []
 
+        if related_legislation_str is not None:
+            try:
+                related_legislation_json = json.loads(
+                    related_legislation_str.replace("'", '"')
+                )
+                context["result"].related_legislation = (
+                    related_legislation_json
+                )
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON decoding error: {e}")
+                context["error"] = f"error fetching details: {e}"
+                context["result"].related_legislation = []
     except Exception as e:
         logger.error("error fetching details: %s", e)
         context["error"] = f"error fetching details: {e}"
@@ -100,20 +101,37 @@ def search_react(request: HttpRequest) -> HttpResponse:
     return render(request, template_name="react-fbr.html", context=context)
 
 
+def _get_base_url(request: HttpRequest) -> str:
+    """
+    Get the base URL from the current request dynamically.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        str: The base URL (e.g., http://localhost:8081 or
+             https://staging.example.com)
+    """
+    base_url = f"{request.scheme}://{request.get_host()}"
+    return base_url
+
+
 def download_csv(request):
     """
     Download CSV view.
 
     Handles the GET request to download the search results in CSV format.
     """
+    logger.debug("building CSV downloadable file")
     context = {
         "service_name": settings.SERVICE_NAME_SEARCH,
     }
 
     try:
+        logger.debug("searching for all documents")
         response_data = search(context, request, ignore_pagination=True)
-
-        logger.info(f"response_data length: {len(response_data)}")
+        logger.debug(f"response_data length: {len(response_data)}")
+        base_url = _get_base_url(request)
 
         search_results = []
         for result in response_data:
@@ -124,6 +142,7 @@ def download_csv(request):
                     "description": result.description,
                     "type": result.type,
                     "date_valid": result.date_valid,
+                    "document_url": f"{base_url}/document/{result.id}",
                 }
             )
 

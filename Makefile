@@ -128,6 +128,13 @@ isort: # Run isort
 secrets-baseline: # Generate a new secrets baseline file
 	poetry run detect-secrets scan > .secrets.baseline
 
+# Target to create SSL certificate and key
+create-ssl:
+	mkdir -p ssl
+	openssl req -new -newkey rsa:2048 -days 365 -nodes -x509 \
+	    -keyout $(KEY_FILE) -out $(CERT_FILE) \
+	    -subj "/C=US/ST=State/L=City/O=Organization/OU=OrgUnit/CN=localhost"
+
 rebuild_cache:
 	export PYTHONPATH=. && \
 	export DJANGO_SETTINGS_MODULE='fbr.settings' && \
@@ -137,6 +144,7 @@ rebuild_cache:
 
 setup_local: # Set up the local environment
 	@echo "$(COLOUR_GREEN)Running initial setup for local environment...$(COLOUR_NONE)"
+	$(MAKE) create-ssl
 	$(MAKE) first-use
 	$(MAKE) start
 	$(MAKE) migrate

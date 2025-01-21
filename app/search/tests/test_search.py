@@ -1,9 +1,11 @@
 # flake8: noqa
-
+import os
 import re
 import unittest
 
 from unittest.mock import MagicMock, call, patch
+
+import django
 
 from app.search.config import SearchDocumentConfig
 from app.search.utils.search import create_search_query
@@ -382,7 +384,3 @@ class TestCreateSearchQuery(unittest.TestCase):
         # Assert the OR and AND operation was applied
         mock_query1.__or__.assert_called_with(mock_query2)
         # mock_query2.__and__.assert_called_with(mock_query3) # TODO:fix assert
-
-
-if __name__ == "__main__":
-    unittest.main()
