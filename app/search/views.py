@@ -43,18 +43,19 @@ def document(request: HttpRequest, id) -> HttpResponse:
 
         # Parse the related_legislation field
         related_legislation_str = context["result"].related_legislation
-        try:
-            related_legislation_double_quotes = (
-                related_legislation_str.replace("'", '"')
-            )
-            related_legislation_json = json.loads(
-                related_legislation_double_quotes
-            )
-            context["result"].related_legislation = related_legislation_json
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON decoding error: {e}")
-            context["result"].related_legislation = []
 
+        if related_legislation_str is not None:
+            try:
+                related_legislation_json = json.loads(
+                    related_legislation_str.replace("'", '"')
+                )
+                context["result"].related_legislation = (
+                    related_legislation_json
+                )
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON decoding error: {e}")
+                context["error"] = f"error fetching details: {e}"
+                context["result"].related_legislation = []
     except Exception as e:
         logger.error("error fetching details: %s", e)
         context["error"] = f"error fetching details: {e}"
