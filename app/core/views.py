@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
@@ -9,6 +11,8 @@ from .cookies import get_ga_cookie_preference, set_ga_cookie_policy
 from .forms import CookiePreferenceForm, EmailForm
 from .gov_notify import send_email_notification
 from .healthcheck import application_service_health
+
+logger = logging.getLogger(__name__)
 
 
 @require_http_methods(["GET"])
@@ -50,7 +54,11 @@ def feedback_view(request):
                 )
                 return HttpResponse(f"Email sent successfully: {response}")
             except Exception as e:
-                return HttpResponse(f"Error sending email: {e}", status=500)
+                logger.error(f"Error sending email: {e}")
+                return HttpResponse(
+                    "An error occurred while sending the email. Please try again later.",  # noqa: E501
+                    status=500,
+                )
     else:
         form = EmailForm()
 
