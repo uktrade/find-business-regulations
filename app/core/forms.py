@@ -95,3 +95,25 @@ class RegulationSearchForm(forms.Form):
             }
         ),
     )
+
+
+class EmailForm(forms.Form):
+    """Email form for sending test emails via GOV.UK Notify."""
+
+    name = forms.CharField(
+        label="Name",
+        required=True,
+        widget=forms.TextInput(
+            attrs={"class": "govuk-input", "placeholder": "Enter your name"}
+        ),
+    )
+    message = forms.CharField(
+        label="Message",
+        required=True,
+        widget=forms.Textarea(
+            attrs={
+                "class": "govuk-textarea",
+                "placeholder": "Enter your message",
+            }
+        ),
+    )

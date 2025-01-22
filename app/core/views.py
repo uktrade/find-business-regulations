@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
@@ -6,8 +8,11 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_http_methods, require_safe
 
 from .cookies import get_ga_cookie_preference, set_ga_cookie_policy
-from .forms import CookiePreferenceForm
+from .forms import CookiePreferenceForm, EmailForm
+from .gov_notify import send_email_notification
 from .healthcheck import application_service_health
+
+logger = logging.getLogger(__name__)
 
 
 @require_http_methods(["GET"])
@@ -30,6 +35,34 @@ def home(request: HttpRequest) -> HttpResponse:
         "service_name": f"{settings.SERVICE_NAME} - Development",
     }
     return render(request, template_name="home.html", context=context)
+
+
+@require_http_methods(["GET", "POST"])
+def feedback_view(request):
+    if request.method == "POST":
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data["name"]
+            message = form.cleaned_data["message"]
+            email_address = settings.GOVUK_NOTIFY_EMAIL  # Set email address
+
+            try:
+                response = send_email_notification(
+                    email_address=email_address,
+                    template_id=settings.GOVUK_NOTIFY_TEMPLATE_ID,
+                    personalisation={"name": name, "message": message},
+                )
+                return HttpResponse(f"Email sent successfully: {response}")
+            except Exception as e:
+                logger.error(f"Error sending email: {e}")
+                return HttpResponse(
+                    "An error occurred while sending the email. Please try again later.",  # noqa: E501
+                    status=500,
+                )
+    else:
+        form = EmailForm()
+
+    return render(request, "feedback.html", {"form": form})
 
 
 @require_safe

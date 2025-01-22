@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block head_title %}{{service_name}} - {{ result.title }}{% endblock %}
+{% block service_name %}{{service_name}}{% endblock %}
+
+{% block body_content %}
+<div class="govuk-width-container">
+  <div class="govuk-width-container">
+    {% comment %} <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+      <ol class="govuk-breadcrumbs__list">
+        <li class="govuk-breadcrumbs__list-item">
+          <a class="govuk-breadcrumbs__link" href="{{ request.META.HTTP_REFERER }}">Search results</a>
+        </li>
+        <li class="govuk-breadcrumbs__list-item">
+          {{ result.title }}
+        </li>
+      </ol>
+    </nav> {% endcomment %}
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <h1 class="govuk-heading-xl">Send feedback</h1>
+          <form method="post" class="govuk-form-group">
+            {% csrf_token %}
+            <div class="govuk-form-group">
+                <label class="govuk-label govuk-label--m" for="{{ form.name.id_for_label }}">
+                    {{ form.name.label }}
+                </label>
+                {{ form.name }}
+            </div>
+            <div class="govuk-form-group">
+                <label class="govuk-label govuk-label--m" for="{{ form.message.id_for_label }}">
+                    {{ form.message.label }}
+                </label>
+                {{ form.message }}
+            </div>
+            <button type="submit" class="govuk-button">Send</button>
+        </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}
