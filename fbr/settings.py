@@ -309,7 +309,7 @@ LOGGING["loggers"]["django"]["handlers"] = ["asim"]
 
 SERVICE_NAME: str = "Find business regulations"
 SERVICE_NAME_SEARCH: str = "Find business regulations"
-CONTACT_EMAIL: str = "findbusinessregulations@businessandtrade.gov.uk"
+CONTACT_EMAIL: str = "find-business-regulations@businessandtrade.gov.uk"
 
 # Cookies
 ANALYTICS_CONSENT_NAME: str = "analytics_consent"
