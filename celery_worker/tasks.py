@@ -30,11 +30,12 @@ def rebuild_cache():
         PublicGateway().build_cache(config)
         Legislation().build_cache(config)
         end = time.time()
-        message = {
-            "message": "rebuilt cache",
-            "duration": round(end - start, 2),
-        }
-        print(message)
+        print(
+            {
+                "message": "rebuilt cache",
+                "duration": round(end - start, 2),
+            }
+        )
     except Exception as e:
         message = {"message": f"error building cache data: {e}"}
         print(message)

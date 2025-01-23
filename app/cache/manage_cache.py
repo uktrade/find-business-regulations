@@ -20,10 +20,13 @@ def rebuild_cache():
     try:
         start = time.time()
         clear_all_documents()
-        config = SearchDocumentConfig(search_query="", timeout=1)
-        Legislation().build_cache(config)
+        config = SearchDocumentConfig(search_query="", timeout=2)
         PublicGateway().build_cache(config)
+        Legislation().build_cache(config)
         end = time.time()
-        return {"message": "rebuilt cache", "duration": round(end - start, 2)}
+        return {
+            "message": "rebuilt cache",
+            "duration": round(end - start, 2),
+        }
     except Exception as e:
-        return {"message": f"error clearing documents: {e}"}
+        return {"message": f"error building cache data: {e}"}
