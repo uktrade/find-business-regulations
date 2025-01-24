@@ -25,12 +25,10 @@ we use the following template tags passed in from search/views.py:
 {{ publishers|json_script:"publishers" }}
 {% endcomment %}
 {% block body_content %}
-{{ document_types|json_script:"document_types" }}
-
-<div class="govuk-width-container">
-  <main class="govuk-main-wrapper" id="main-content" role="main">
-    {% include "intro.html" %}
-    <div id="find-business-regulations-react-app"></div>
-  </main>
-</div>
+  <div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content">
+      {% include "intro.html" %}
+      <div id="find-business-regulations-react-app"></div>
+    </main>
+  </div>
 {% endblock %}

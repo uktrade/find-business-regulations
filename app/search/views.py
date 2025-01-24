@@ -88,17 +88,7 @@ def search_react(request: HttpRequest) -> HttpResponse:
 
     Renders the React based search page.
     """
-
-    context = {
-        "service_name": settings.SERVICE_NAME_SEARCH,
-        "document_types": {
-            "standard": "Standard",
-            "guidance": "Guidance",
-            "legislation": "Legislation",
-        },
-    }
-
-    return render(request, template_name="react-fbr.html", context=context)
+    return render(request, template_name="react-fbr.html")
 
 
 def _get_base_url(request: HttpRequest) -> str:
