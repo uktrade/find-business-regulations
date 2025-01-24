@@ -174,7 +174,7 @@ function App() {
                 setIsLoading={setIsLoading}
               />
             ) : (
-              <p>Loading publishers...</p>
+              <p className="govuk-body">Loading publishers...</p>
             )}
           </fieldset>
         </div>
