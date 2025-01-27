@@ -71,10 +71,12 @@ def search_django(request: HttpRequest):
     Renders the Django based search page.
     """
     form = RegulationSearchForm(request.GET)
+    search_term = request.GET.get("search", "")
 
     context = {
         "service_name": settings.SERVICE_NAME_SEARCH,
         "form": form,
+        "search_term": search_term,
     }
     context = search(context, request)
 
@@ -88,7 +90,8 @@ def search_react(request: HttpRequest) -> HttpResponse:
 
     Renders the React based search page.
     """
-    return render(request, template_name="react-fbr.html")
+    context = {"service_name": settings.SERVICE_NAME_SEARCH}
+    return render(request, template_name="react-fbr.html", context=context)
 
 
 def _get_base_url(request: HttpRequest) -> str:

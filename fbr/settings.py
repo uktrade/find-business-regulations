@@ -322,7 +322,7 @@ ANALYTICS_CONSENT_NAME: str = "analytics_consent"
 
 # HOSTNAME
 HOSTNAME_MAP = {
-    "local": "http://localhost:8081",
+    "local": "https://localhost:8081",
     "dev": "https://dev.find-business-regulations.uktrade.digital/",
     "staging": "https://staging.find-business-regulations.uktrade.digital/",
     "prod": "https://find-business-regulations.private-beta.service.trade.gov.uk/",

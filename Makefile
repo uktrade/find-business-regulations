@@ -56,7 +56,7 @@ first-use: # Initialise for local execution
 	$(MAKE) stop
 	@echo "$(COLOUR_GREEN)$(APPLICATION_NAME) is ready for use$(COLOUR_NONE)";
 	@echo "$(COLOUR_GREEN)Start services with 'make start'$(COLOUR_NONE)"
-	@echo "$(COLOUR_GREEN)Service is listening on http://localhost:8081$(COLOUR_NONE)"
+	@echo "$(COLOUR_GREEN)Service is listening on https://localhost:8081$(COLOUR_NONE)"
 	@echo "$(COLOUR_GREEN)View logs with 'make logs'$(COLOUR_NONE)"
 	@echo "$(COLOUR_GREEN)Shutdown with 'make stop'$(COLOUR_NONE)"
 	@echo "$(COLOUR_GREEN)Destroy containers with 'make down'$(COLOUR_NONE)"

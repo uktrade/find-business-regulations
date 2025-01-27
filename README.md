@@ -41,7 +41,7 @@ Start the services:
 
 Navigate a browser to:
 
-    http://localhost:8081
+    https://localhost:8081
 
 ## Local development environment
 
@@ -105,7 +105,6 @@ With your Poetry shell active:
 ### Setup the service, database and cache locally
 
     $ make setup_local
-
 
 ### Update database tables (manually)...do not use unless you know what you are doing
 
