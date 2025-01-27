@@ -20,15 +20,17 @@ def feedback_view(request):
     if request.method == "POST":
         form = EmailForm(request.POST)
         if form.is_valid():
-            name = form.cleaned_data["name"]
-            message = form.cleaned_data["message"]
-            email_address = settings.GOVUK_NOTIFY_EMAIL  # Set email address
+            feedback = form.cleaned_data["feedback"]
+            email = form.cleaned_data["email"]
+            email_address = (
+                settings.GOVUK_NOTIFY_EMAIL
+            )  # Set email address to send feedback to
 
             try:
                 response = send_email_notification(
                     email_address=email_address,
                     template_id=settings.GOVUK_NOTIFY_TEMPLATE_ID,
-                    personalisation={"name": name, "message": message},
+                    personalisation={"email": email, "feedback": feedback},
                 )
                 return HttpResponse(f"Email sent successfully: {response}")
             except Exception as e:

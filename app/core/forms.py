@@ -100,20 +100,36 @@ class RegulationSearchForm(forms.Form):
 class EmailForm(forms.Form):
     """Email form for sending test emails via GOV.UK Notify."""
 
-    name = forms.CharField(
-        label="Name",
-        required=True,
-        widget=forms.TextInput(
-            attrs={"class": "govuk-input", "placeholder": "Enter your name"}
-        ),
-    )
-    message = forms.CharField(
-        label="Message",
+    feedback = forms.CharField(
+        label="Tell us how we can improve",
+        max_length=1200,
+        help_text="Include information and links that will help us understand, investigate and correct any problems you've found.",  # noqa: E501
         required=True,
         widget=forms.Textarea(
             attrs={
                 "class": "govuk-textarea",
-                "placeholder": "Enter your message",
+                "rows": 4,
+                "id": "feedback",
             }
         ),
+        error_messages={
+            "required": "Enter your feedback or report a problem",
+            "max_length": "Feedback must be 1,200 characters or less",
+        },
+    )
+
+    email = forms.EmailField(
+        label="Your email address",
+        help_text="We'll only use this if we need to find out more about your comments.",  # noqa: E501
+        required=True,
+        widget=forms.EmailInput(
+            attrs={
+                "class": "govuk-input",
+                "id": "email",
+            }
+        ),
+        error_messages={
+            "required": "Enter an email address in the correct format",
+            "invalid": "Enter an email address in the correct format",
+        },
     )
