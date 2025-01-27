@@ -29,6 +29,7 @@ function App() {
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(false)
   const [publishers, setPublishers] = useState([]) // Add publishers state
   const [publisherCheckedState, setPublisherCheckedState] = useState([])
+  const [pageTitle, setPageTitle] = useState("Find business regulations")
 
   useEffect(() => {
     const fetchPublishers = async () => {
@@ -135,6 +136,19 @@ function App() {
       clearTimeout(handler)
     }
   }, [searchQuery, docTypeQuery, publisherQuery, sortQuery, pageQuery])
+
+  useEffect(() => {
+    if (searchQuery.length > 0) {
+      const newTitle = `${searchQuery.join(", ")} - page ${pageQuery[0]} - Find business regulations`
+      setPageTitle(newTitle)
+    } else {
+      setPageTitle("Find business regulations")
+    }
+  }, [searchQuery, pageQuery])
+
+  useEffect(() => {
+    document.title = pageTitle
+  }, [pageTitle])
 
   return (
     <div className="govuk-grid-row search-form">

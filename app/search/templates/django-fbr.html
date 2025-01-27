@@ -1,7 +1,17 @@
 {% extends "base.html" %}
 {% load service_problem_tags %}
 {% load url_replace_tags %}
-{% block head_title %}{% if is_paginated %}Page {{current_page}} - {% endif %}{{service_name}}{% endblock %}
+{% block head_title %}
+  {% if search_term %}
+      {{ search_term }} -
+      {% if is_paginated %}
+        page {{current_page}} -
+      {% endif %}
+      {{service_name}}
+  {% else %}
+      {{service_name}}
+  {% endif %}
+{% endblock %}
 {% block service_name %}{{service_name}}{% endblock %}
 
 {% block js_toggle %}
@@ -19,7 +29,7 @@
   {% endcomment %}
 
   <div class="govuk-width-container">
-    <main class="govuk-main-wrapper" id="main-content" role="main">
+    <main class="govuk-main-wrapper" id="main-content">
       {% if request_exception %}
         {% render_service_problem %}
       {% else %}

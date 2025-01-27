@@ -15,28 +15,6 @@ from .healthcheck import application_service_health
 logger = logging.getLogger(__name__)
 
 
-@require_http_methods(["GET"])
-def home(request: HttpRequest) -> HttpResponse:
-    """Home.
-
-    If we're in prod, redirect to the GOV.UK page, otherwise render a dev home
-    page.
-    """
-    if (
-        request.META.get("HTTP_HOST")
-        == "find-business-regulations.uktrade.digital"
-    ):
-        return HttpResponse(
-            content="Redirecting to GOV.UK",
-            status=302,
-            headers={"Location": "https://www.gov.uk"},
-        )
-    context = {
-        "service_name": f"{settings.SERVICE_NAME} - Development",
-    }
-    return render(request, template_name="home.html", context=context)
-
-
 @require_http_methods(["GET", "POST"])
 def feedback_view(request):
     if request.method == "POST":

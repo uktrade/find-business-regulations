@@ -87,8 +87,6 @@ urlpatterns = [
     # This is the URL for downloading the search results in CSV format
     path("download_csv/", search_views.download_csv, name="csvdata"),
     path("nojs/download_csv/", search_views.download_csv, name="csvdata"),
-    # If we choose to have a start page with green button, this is it:
-    # path("", core_views.home, name="home"),
     path("document/<str:id>", search_views.document, name="document"),
     path("healthcheck/", core_views.health_check, name="healthcheck"),
     path(
