@@ -31,7 +31,7 @@
           <form method="post" novalidate>
 
             {% csrf_token %}
-            <div class="govuk-form-group">
+            <div class="govuk-form-group {% if form.feedback.errors %}govuk-form-group--error{% endif %}">
               <label class="govuk-label govuk-label--l" for="{{ form.feedback.id_for_label }}">
                 {{ form.feedback.label }}
               </label>
@@ -57,7 +57,7 @@
               >{{ form.feedback.value|default:'' }}</textarea>
             </div>
 
-            <div class="govuk-form-group">
+            <div class="govuk-form-group {% if form.email.errors %}govuk-form-group--error{% endif %}">
               <label class="govuk-label govuk-label--l" for="{{ form.email.id_for_label }}">
                 {{ form.email.label }}
               </label>
