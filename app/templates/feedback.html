@@ -52,7 +52,7 @@
                 id="{{ form.feedback.id_for_label }}"
                 rows="10"
                 aria-describedby="feedback-hint feedback-info {% if form.feedback.errors %}feedback-error{% endif %}"
-                maxlength="3000"
+                maxlength="10000"
                 style="margin-bottom: 5px;"
               >{{ form.feedback.value|default:'' }}</textarea>
             </div>

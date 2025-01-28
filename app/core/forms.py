@@ -102,7 +102,7 @@ class EmailForm(forms.Form):
 
     feedback = forms.CharField(
         label="Tell us how we can improve",
-        max_length=1200,
+        max_length=10000,
         help_text="Include information and links that will help us understand, investigate and correct any problems you've found.",  # noqa: E501
         required=True,
         widget=forms.Textarea(
