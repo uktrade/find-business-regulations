@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+import time
 
 import requests  # type: ignore
 
@@ -53,7 +54,7 @@ def _fetch_title_from_url(url):
         if not url.startswith(("http://", "https://")):
             url = "https://" + url
 
-        response = requests.get(url, timeout=3)
+        response = requests.get(url, timeout=2)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "html.parser")
 
@@ -67,11 +68,12 @@ def _fetch_title_from_url(url):
         if page_title:
             return page_title.get_text(strip=True)
 
-        logger.info(f"title not found in {url}")
-        return "title not found"
+        logger.warning(f"title not found in {url}")
     except Exception as e:
         logger.error(f"error fetching title from {url}: {e}")
-        return None
+
+    # No title found therefore return empty string
+    return ""
 
 
 class PublicGateway:
@@ -93,11 +95,23 @@ class PublicGateway:
         # URL encode the query for the API request
         params = {"format": "json"}
 
+        # Start time
+        start_time = time.time()
+
         # Make the GET request
         response = requests.get(
             self._base_url,
             params=params,
             timeout=config.timeout,  # nosec BXXX
+        )
+
+        # End time
+        end_time = time.time()
+        initial_request_system_time = end_time - start_time
+
+        logger.debug(
+            f"fetching all data from orpd took "
+            f"{initial_request_system_time} seconds"
         )
 
         # Check if the request was successful
@@ -109,6 +123,9 @@ class PublicGateway:
             total_documents = len(data.get("uk_regulatory_documents"))
             inserted_document_count = 1
             for row in data.get("uk_regulatory_documents"):
+                # Start time
+                start_time = time.time()
+
                 logger.info(
                     f"inserting or updating document "
                     f"{inserted_document_count} / ({total_documents})..."
@@ -141,23 +158,36 @@ class PublicGateway:
                     related_legislation_urls = row[
                         "related_legislation"
                     ].split("\n")
+
                     related_legislation = []
                     for url in related_legislation_urls:
-                        title = _fetch_title_from_url(url)
-                        if title:
-                            related_legislation.append(
-                                {"url": url, "title": title}
+                        try:
+                            title = _fetch_title_from_url(url)
+                        except Exception as e:
+                            logger.error(
+                                f"error fetching title from {url}: {e}"
                             )
+                            title = ""
+
+                        related_legislation.append(
+                            {
+                                "url": url,
+                                "title": title if title != "" else url,
+                            }
+                        )
                     row["related_legislation"] = related_legislation
 
+                # End time
+                end_time = time.time()
+                process_related_legislation_time = end_time - start_time
+                logger.info(
+                    f"row {row["id"]} took "
+                    f"{process_related_legislation_time} seconds to process"
+                )
                 insert_or_update_document(row)
                 inserted_document_count += 1
             return response.status_code, inserted_document_count
         else:
             logger.error(
-                f"error fetching data from orpd: {response.status_code}"
-            )
-
-            raise Exception(
                 f"error fetching data from orpd: {response.status_code}"
             )

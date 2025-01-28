@@ -18,7 +18,7 @@ from app.search.utils.search import get_publisher_names, search
 urls_logger = logging.getLogger(__name__)
 
 
-class DataResponseViewSet(viewsets.ModelViewSet):
+class DataResponseViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["get"], url_path="search")
     def search(self, request, *args, **kwargs):
         context = {
