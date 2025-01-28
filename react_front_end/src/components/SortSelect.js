@@ -6,8 +6,8 @@ function SortSelect({ sortQuery, setSortQuery }) {
   return (
     <div className="govuk-grid-row">
       <div className="govuk-grid-column-full">
-        <div className="orp-flex">
-          <label className="govuk-label govuk-!-margin-right-3 orp-!-no-text-wrap" htmlFor="sort-select">
+        <div className="fbr-flex">
+          <label className="govuk-label govuk-!-margin-right-3 fbr-!-no-text-wrap" htmlFor="sort-select">
             Sort by
           </label>
           <select

@@ -12,9 +12,9 @@ function AppliedFilters({ documentTypeCheckedState, publisherCheckedState, remov
   ]
 
   return (
-    <ul className="orp-applied-filters-container">
+    <ul className="fbr-applied-filters-container">
       {checkedFilters.map((filter, index) => (
-        <li className="orp-applied-filter-tag" key={index}>
+        <li className="fbr-applied-filter-tag" key={index}>
           <a href="#delete" onClick={() => removeFilter(filter.type, filter.name)}>
             <span className="govuk-visually-hidden">Remove filter:</span>
             <span className="govuk-body-s">{filter.label}</span>

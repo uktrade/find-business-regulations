@@ -1,41 +1,90 @@
 {% extends "base.html" %}
 
-{% block head_title %}{{service_name}} - {{ result.title }}{% endblock %}
+{% block head_title %}{{service_name}} - Feedback{% endblock %}
 {% block service_name %}{{service_name}}{% endblock %}
 
 {% block body_content %}
   <div class="govuk-width-container">
-    {% comment %}
-    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
-      <ol class="govuk-breadcrumbs__list">
-        <li class="govuk-breadcrumbs__list-item">
-          <a class="govuk-breadcrumbs__link" href="{{ request.META.HTTP_REFERER }}">Search results</a>
-        </li>
-        <li class="govuk-breadcrumbs__list-item">
-          {{ result.title }}
-        </li>
-      </ol>
-    </nav>
-    {% endcomment %}
     <main class="govuk-main-wrapper" id="main-content">
       <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
-          <h1 class="govuk-heading-xl">Send feedback</h1>
-          <form method="post" class="govuk-form-group">
+          {% if form.errors %}
+            <div class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert"
+                data-module="govuk-error-summary">
+              <h2 class="govuk-error-summary__title" id="error-summary-title">
+                There is a problem
+              </h2>
+              <div class="govuk-error-summary__body">
+                <ul class="govuk-list govuk-error-summary__list">
+                  {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                      <li>
+                        <a href="#{{ field }}">{{ error }}</a>
+                      </li>
+                    {% endfor %}
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endif %}
+          <h1 class="govuk-heading-xl">Report a problem or leave feedback</h1>
+          <form method="post" novalidate>
+
             {% csrf_token %}
             <div class="govuk-form-group">
-                <label class="govuk-label govuk-label--m" for="{{ form.name.id_for_label }}">
-                    {{ form.name.label }}
-                </label>
-                {{ form.name }}
+              <label class="govuk-label govuk-label--l" for="{{ form.feedback.id_for_label }}">
+                {{ form.feedback.label }}
+              </label>
+              <div class="govuk-hint" id="feedback-hint">
+                {{ form.feedback.help_text }}
+              </div>
+              {% if form.feedback.errors %}
+              <p id="{{ form.feedback.html_name }}-error" class="govuk-error-message">
+                <span class="govuk-visually-hidden">Error:</span>
+                {% for error in form.feedback.errors %}
+                  {{ error }}<br>
+                {% endfor %}
+              </p>
+              {% endif %}
+              <textarea
+                name="{{ form.feedback.name }}"
+                class="govuk-textarea {% if form.feedback.errors %}govuk-textarea--error{% endif %}"
+                id="{{ form.feedback.id_for_label }}"
+                rows="10"
+                aria-describedby="feedback-hint feedback-info {% if form.feedback.errors %}feedback-error{% endif %}"
+                maxlength="10000"
+                style="margin-bottom: 5px;"
+              >{{ form.feedback.value|default:'' }}</textarea>
             </div>
+
             <div class="govuk-form-group">
-                <label class="govuk-label govuk-label--m" for="{{ form.message.id_for_label }}">
-                    {{ form.message.label }}
-                </label>
-                {{ form.message }}
+              <label class="govuk-label govuk-label--l" for="{{ form.email.id_for_label }}">
+                {{ form.email.label }}
+              </label>
+              <div class="govuk-hint" id="email-hint">
+                {{ form.email.help_text }}
+              </div>
+              {% if form.email.errors %}
+              <p id="{{ form.email.html_name }}-error" class="govuk-error-message">
+                <span class="govuk-visually-hidden">Error:</span>
+                {% for error in form.email.errors %}
+                  {{ error }}<br>
+                {% endfor %}
+              </p>
+              {% endif %}
+              <input
+                type="email"
+                name="{{ form.email.name }}"
+                class="govuk-input {% if form.email.errors %}govuk-input--error{% endif %}"
+                id="{{ form.email.id_for_label }}"
+                aria-describedby="email-hint email-info {% if form.email.errors %}email-error{% endif %}"
+                style="margin-bottom: 5px;"
+                spellcheck="false"
+                autocomplete="email"
+              />
             </div>
-            <button type="submit" class="govuk-button">Send</button>
+
+            <button type="submit" class="govuk-button" data-module="govuk-button">Send feedback</button>
         </form>
         </div>
       </div>

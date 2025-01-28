@@ -20,22 +20,26 @@ def feedback_view(request):
     if request.method == "POST":
         form = EmailForm(request.POST)
         if form.is_valid():
-            name = form.cleaned_data["name"]
-            message = form.cleaned_data["message"]
-            email_address = settings.GOVUK_NOTIFY_EMAIL  # Set email address
+            feedback = form.cleaned_data["feedback"]
+            email = form.cleaned_data["email"]
+            email_address = (
+                settings.GOVUK_NOTIFY_EMAIL
+            )  # Set email address to send feedback to
 
             try:
                 response = send_email_notification(
                     email_address=email_address,
                     template_id=settings.GOVUK_NOTIFY_TEMPLATE_ID,
-                    personalisation={"name": name, "message": message},
+                    personalisation={"email": email, "feedback": feedback},
                 )
-                return HttpResponse(f"Email sent successfully: {response}")
+                logger.info(f"Email sent successfully: {response}")
+                return render(
+                    request, "feedback_confirmation.html", {"success": True}
+                )
             except Exception as e:
                 logger.error(f"Error sending email: {e}")
-                return HttpResponse(
-                    "An error occurred while sending the email. Please try again later.",  # noqa: E501
-                    status=500,
+                return render(
+                    request, "feedback_confirmation.html", {"success": False}
                 )
     else:
         form = EmailForm()

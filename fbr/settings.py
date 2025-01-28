@@ -114,6 +114,7 @@ TEMPLATES = [
         "DIRS": [
             os.path.join(BASE_DIR, "app", "search", "templates"),
             os.path.join(BASE_DIR, "app", "templates"),
+            os.path.join(BASE_DIR, "app", "templates", "form_errors"),
         ],
         "APP_DIRS": True,
         "OPTIONS": {

@@ -84,18 +84,15 @@
 
         {% if result.regulatory_topics %}
           <h2 class="govuk-heading-m">Regulatory topics</h2>
-          <ul class="govuk-list orp-topics-list govuk-!-margin-bottom-6">
+          <ul class="govuk-list fbr-topics-list govuk-!-margin-bottom-6">
             {% for topic in result.regulatory_topics %}
-            <li class="govuk-body-s orp-secondary-text-colour">{{ topic }}</li>
+            <li class="govuk-body-s fbr-secondary-text-colour">{{ topic }}</li>
             {% endfor %}
           </ul>
         {% endif %}
 
-
-        <p class="govuk-body">
-          Email <a class="govuk-link" href="mailto:find-business-regulations@businessandtrade.gov.uk">
-            find-business-regulations@businessandtrade.gov.uk
-          </a> to report a problem with this result.
+        <p class="govuk-body govuk-!-margin-top-9">
+          <a class="govuk-link govuk-link--no-visited-state" href="/feedback">Report a problem with this result</a>
         </p>
       </div>
     </div>

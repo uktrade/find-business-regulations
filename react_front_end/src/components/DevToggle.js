@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 
 function DevToggle({ appsToDisplay, setAppsToDisplay }) {
-  const djangoAppDiv = document.getElementById("orp-django-search")
+  const djangoAppDiv = document.getElementById("fbr-django-search")
 
   useEffect(() => {
     if (djangoAppDiv) {
