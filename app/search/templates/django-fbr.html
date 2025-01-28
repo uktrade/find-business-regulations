@@ -34,7 +34,7 @@
         {% render_service_problem %}
       {% else %}
         {% include "intro.html" %}
-        <form method="get" class="search-form" id="orp-django-search">
+        <form method="get" class="search-form" id="fbr-django-search">
           <div class="govuk-grid-row">
             <div class="govuk-grid-column-one-third">
                 <div class="govuk-form-group {% if form.search.errors %}govuk-form-group--error{% endif %} search-group">
@@ -184,7 +184,7 @@
             </div>
 
             <div class="govuk-grid-column-two-thirds">
-              <div class="orp-flex orp-flex--space-between">
+              <div class="fbr-flex fbr-flex--space-between">
                 <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-0">
                   {% if results %}
                     {% if is_paginated %}
@@ -204,8 +204,8 @@
               {% if results %}
                 <div class="govuk-grid-row">
                   <div class="govuk-grid-column-full">
-                    <div class="orp-flex">
-                      <label class="govuk-label govuk-!-margin-right-3 orp-!-no-text-wrap" for="{{ form.search.id_for_label }}">
+                    <div class="fbr-flex">
+                      <label class="govuk-label govuk-!-margin-right-3 fbr-!-no-text-wrap" for="{{ form.search.id_for_label }}">
                         {{ form.sort.label }}
                       </label>
                       {{ form.sort }}
@@ -218,7 +218,7 @@
               <div class="govuk-grid-row">
                 <div class="govuk-grid-column-full">
                   {% if results %}
-                  <div class="govuk-summary-list orp-search-results">
+                  <div class="govuk-summary-list fbr-search-results">
                     {% for result in results %}
                     <div class="govuk-summary-list__row--no-border">
                       <span class="govuk-caption-m">{{ result.type }}</span>
@@ -231,15 +231,15 @@
                         {{result.description}}
                       </p>
 
-                      <p class="govuk-body-s orp-secondary-text-colour govuk-!-margin-bottom-2">
+                      <p class="govuk-body-s fbr-secondary-text-colour govuk-!-margin-bottom-2">
                         Published by: {{ result.publisher}}
                       </p>
-                      <p class="govuk-body-s orp-secondary-text-colour">
+                      <p class="govuk-body-s fbr-secondary-text-colour">
                         Last updated: {{ result.date_modified | date:"j F Y" }}
                       </p>
-                      <ul class="govuk-list orp-topics-list">
+                      <ul class="govuk-list fbr-topics-list">
                         {% for topic in result.regulatory_topics %}
-                        <li class="govuk-body-s orp-secondary-text-colour">{{ topic }}</li>
+                        <li class="govuk-body-s fbr-secondary-text-colour">{{ topic }}</li>
                         {% endfor %}
                       </ul>
                     </div>

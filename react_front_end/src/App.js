@@ -210,7 +210,7 @@ function App() {
         </p>
       </div>
       <div className="govuk-grid-column-two-thirds">
-        <div className="orp-flex orp-flex--space-between">
+        <div className="fbr-flex fbr-flex--space-between">
           <ResultsCount
             isLoading={isLoading}
             start={data.start_index}

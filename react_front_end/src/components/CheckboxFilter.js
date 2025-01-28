@@ -23,7 +23,7 @@ function CheckboxFilter({ checkboxData, checkedState, setCheckedState, setQueryP
     <>
       {withSearch ? <SearchCheckboxes searchQuery={searchQuery} setSearchQuery={setSearchQuery} /> : null}
       <div
-        className={`govuk-checkboxes govuk-checkboxes--small orp-checkbox-filters ${withSearch ? "orp-max-height-250 orp-scrollbars-visible" : ""}`}
+        className={`govuk-checkboxes govuk-checkboxes--small fbr-checkbox-filters ${withSearch ? "fbr-max-height-250 fbr-scrollbars-visible" : ""}`}
         data-module="govuk-checkboxes"
       >
         {filteredData.map(({ name, label }, index) => (
@@ -58,9 +58,9 @@ function SearchCheckboxes({ searchQuery, setSearchQuery }) {
       <label className="govuk-label govuk-visually-hidden" htmlFor="input-autocomplete">
         Search by publisher
       </label>
-      <div className="search-input-button search-input-button--black orp-publisher-search">
+      <div className="search-input-button search-input-button--black fbr-publisher-search">
         <input
-          className="govuk-input orp-publisher-search__input app-site-search__input--default"
+          className="govuk-input fbr-publisher-search__input app-site-search__input--default"
           id="input-autocomplete"
           name="input-autocomplete"
           type="search"

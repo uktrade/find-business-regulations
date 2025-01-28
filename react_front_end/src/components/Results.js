@@ -8,7 +8,7 @@ function Results({ results, isLoading, searchQuery = "" }) {
 
   const highlight = (text) => {
     const regex = new RegExp(searchQuery, "gi")
-    const highlightedText = text.replace(regex, (match) => `<mark class="orp-marked-text">${match}</mark>`)
+    const highlightedText = text.replace(regex, (match) => `<mark class="fbr-marked-text">${match}</mark>`)
     return { __html: highlightedText }
   }
 
@@ -38,7 +38,7 @@ function Results({ results, isLoading, searchQuery = "" }) {
         )
 
       return (
-        <li key={index} className="govuk-body-s orp-secondary-text-colour">
+        <li key={index} className="govuk-body-s fbr-secondary-text-colour">
           {highlightedTopic}
         </li>
       )
@@ -46,7 +46,7 @@ function Results({ results, isLoading, searchQuery = "" }) {
   }
 
   return results ? (
-    <div className="govuk-summary-list orp-search-results">
+    <div className="govuk-summary-list fbr-search-results">
       {results.map((result) => {
         const { id, type, title, description, publisher, date_modified, date_valid, regulatory_topics } = result
 
@@ -66,10 +66,10 @@ function Results({ results, isLoading, searchQuery = "" }) {
               </a>
             </h2>
             <p className="govuk-body">{highlightedDescription}</p>
-            <p className="govuk-body-s orp-secondary-text-colour govuk-!-margin-bottom-2">Published by: {publisher}</p>
-            <p className="govuk-body-s orp-secondary-text-colour">Last updated: {govukDate}</p>
+            <p className="govuk-body-s fbr-secondary-text-colour govuk-!-margin-bottom-2">Published by: {publisher}</p>
+            <p className="govuk-body-s fbr-secondary-text-colour">Last updated: {govukDate}</p>
             {regulatory_topics && regulatory_topics.length > 0 ? (
-              <ul className="govuk-list orp-topics-list">{renderRegulatoryTopics(regulatory_topics, searchQuery)}</ul>
+              <ul className="govuk-list fbr-topics-list">{renderRegulatoryTopics(regulatory_topics, searchQuery)}</ul>
             ) : null}
             <hr className="govuk-section-break govuk-section-break--l govuk-section-break--visible" />
           </div>

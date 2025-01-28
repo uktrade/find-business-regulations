@@ -9,8 +9,8 @@
       <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
           <h1 class="govuk-heading-xl">Report a problem or leave feedback</h1>
-          {% if success %}
-            <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+          {% comment %} {% if success %} {% endcomment %}
+            {% comment %} <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
               <div class="govuk-notification-banner__header">
                 <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
                   Feedback sent
@@ -24,8 +24,8 @@
                   We will only contact you if we need more information.
                 </p>
               </div>
-            </div>
-          {% else %}
+            </div> {% endcomment %}
+          {% comment %} {% else %} {% endcomment %}
             <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
               <div class="govuk-notification-banner__header">
                 <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
@@ -33,15 +33,18 @@
                 </h2>
               </div>
               <div class="govuk-notification-banner__content">
-                <p class="govuk-notification-banner__heading">
+                <h3 class="govuk-notification-banner__heading">
+                  We have not received your feedback.
+                </h3>
+                <p class="govuk-body">
                   You can still leave feedback by emailing
-                  <a class="govuk-link" href="mailto:find-business-regulations@businessandtrade.gov.uk">
+                  <a class="govuk-link fbr-!-no-text-wrap" href="mailto:find-business-regulations@businessandtrade.gov.uk">
                     find-business-regulations@businessandtrade.gov.uk
                   </a>
                 </p>
               </div>
             </div>
-          {% endif %}
+          {% comment %} {% endif %} {% endcomment %}
           <p class="govuk-body">
             <a href="/" class="govuk-link govuk-link--no-visited-state">Find business regulations and guidance</a>
           </p>

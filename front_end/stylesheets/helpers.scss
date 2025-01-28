@@ -1,13 +1,13 @@
-.orp-\!-no-text-wrap {
+.fbr-\!-no-text-wrap {
   white-space: nowrap;
 }
 
-// .orp-checkbox-filters {
+// .fbr-checkbox-filters {
 //   padding-left: 10px;
 // }
 
 // Ensure scrollbars are always visible
-.orp-scrollbars-visible {
+.fbr-scrollbars-visible {
   overflow-y: auto; /* Show vertical scrollbars when needed */
   overflow-x: hidden; /* Hide horizontal scrollbars */
 
@@ -59,24 +59,24 @@
 
 }
 
-.orp-max-height-250 {
+.fbr-max-height-250 {
   max-height: 250px;
 }
 
-.orp-flex {
+.fbr-flex {
   display: flex;
   align-items: center;
 }
 
-.orp-flex--space-between {
+.fbr-flex--space-between {
   justify-content: space-between;
 }
 
-.orp-secondary-text-colour {
+.fbr-secondary-text-colour {
   color: govuk-colour("dark-grey");
 }
 
-.orp-link-text-decoration-none {
+.fbr-link-text-decoration-none {
   text-decoration: none;
 
   &:hover {
@@ -84,7 +84,7 @@
   }
 }
 
-.orp-marked-text {
+.fbr-marked-text {
   font-weight: bold;
   background-color: inherit;
 }

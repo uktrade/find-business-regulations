@@ -83,7 +83,7 @@ class PublicGateway:
             base_url (str): The base URL of the Trade Data API.
         """
         self._base_url = (
-            "https://data.api.trade.gov.uk/v1/datasets/orp-regulations"
+            "https://data.api.trade.gov.uk/v1/datasets/fbr-regulations"
             "/versions/v1.0.1/data"
         )
 

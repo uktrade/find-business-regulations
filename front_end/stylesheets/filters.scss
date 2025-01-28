@@ -1,8 +1,8 @@
-.orp-applied-filters-container {
+.fbr-applied-filters-container {
   background-color: govuk-colour("light-grey");
   @include govuk-responsive-padding(2);
 
-  .orp-applied-filter-tag {
+  .fbr-applied-filter-tag {
     display: inline-flex;
     line-height: 1;
 
@@ -23,8 +23,8 @@
   }
 }
 
-.orp-publisher-search {
-  .orp-publisher-search__input {
+.fbr-publisher-search {
+  .fbr-publisher-search__input {
     position: relative;
     background-image: url("../images/icon-search-black.svg");
     background-repeat: no-repeat;
