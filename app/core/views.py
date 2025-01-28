@@ -32,12 +32,14 @@ def feedback_view(request):
                     template_id=settings.GOVUK_NOTIFY_TEMPLATE_ID,
                     personalisation={"email": email, "feedback": feedback},
                 )
-                return HttpResponse(f"Email sent successfully: {response}")
+                logger.info(f"Email sent successfully: {response}")
+                return render(
+                    request, "feedback_confirmation.html", {"success": True}
+                )
             except Exception as e:
                 logger.error(f"Error sending email: {e}")
-                return HttpResponse(
-                    "An error occurred while sending the email. Please try again later.",  # noqa: E501
-                    status=500,
+                return render(
+                    request, "feedback_confirmation.html", {"success": False}
                 )
     else:
         form = EmailForm()
