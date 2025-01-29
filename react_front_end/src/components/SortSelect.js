@@ -7,7 +7,10 @@ function SortSelect({ sortQuery, setSortQuery }) {
     <div className="govuk-grid-row">
       <div className="govuk-grid-column-full">
         <div className="fbr-flex">
-          <label className="govuk-label govuk-!-margin-right-3 fbr-!-no-text-wrap" htmlFor="sort-select">
+          <label
+            className="govuk-label govuk-!-margin-bottom-0 govuk-!-margin-right-3 fbr-!-no-text-wrap"
+            htmlFor="sort-select"
+          >
             Sort by
           </label>
           <select
