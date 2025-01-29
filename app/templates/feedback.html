@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
-{% block head_title %}{{service_name}} - Feedback{% endblock %}
+{% block head_title %}
+  {% if form.errors %}Error - {% endif %}Feedback - {{service_name}}
+{% endblock %}
 {% block service_name %}{{service_name}}{% endblock %}
 
 {% block body_content %}
