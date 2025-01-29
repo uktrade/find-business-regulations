@@ -17,6 +17,16 @@ logger = logging.getLogger(__name__)
 
 @require_http_methods(["GET", "POST"])
 def feedback_view(request):
+    """Feedback.
+
+    Returns feedback page, and then attempts to
+    send email using gov.uk Notify. Confirmation or
+    error page is returned after form submission.
+    """
+    context = {
+        "service_name": settings.SERVICE_NAME,
+    }
+
     if request.method == "POST":
         form = EmailForm(request.POST)
         if form.is_valid():
@@ -33,18 +43,21 @@ def feedback_view(request):
                     personalisation={"email": email, "feedback": feedback},
                 )
                 logger.info(f"Email sent successfully: {response}")
+                context["success"] = True
                 return render(
-                    request, "feedback_confirmation.html", {"success": True}
+                    request, "feedback_confirmation.html", context=context
                 )
             except Exception as e:
                 logger.error(f"Error sending email: {e}")
+                context["success"] = False
                 return render(
-                    request, "feedback_confirmation.html", {"success": False}
+                    request, "feedback_confirmation.html", context=context
                 )
     else:
         form = EmailForm()
 
-    return render(request, "feedback.html", {"form": form})
+    context["form"] = form
+    return render(request, "feedback.html", context=context)
 
 
 @require_safe
