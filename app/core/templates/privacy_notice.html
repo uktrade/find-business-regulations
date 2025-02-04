@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block head_title %}{{service_name}}{% endblock %}
+{% block head_title %}Privacy notice - {{service_name}}{% endblock %}
 {% block service_name %}{{service_name}}{% endblock %}
 
 {% block body_content %}
@@ -14,7 +14,7 @@
       <div class="govuk-grid-row govuk-body">
         <div class="govuk-grid-column-two-thirds">
           <h2 class="govuk-heading-l">The purpose of this notice</h2>
-          <p class="govuk-body">This privacy notice explains how the Department for Business and Trade (DBT), as a 'data controller', processes personal data for the 'Find business regulations and guidance' service on GOV.UK.
+          <p class="govuk-body">This privacy notice explains how the Department for Business and Trade (DBT), as a 'data controller', processes personal data for the '{{service_name_long}}' service on GOV.UK.
           </p>
           <p class="govuk-body">This notice is supplemented by our <a href="https://www.great.gov.uk/privacy-and-cookies/"
               class="govuk-link">main privacy notice</a> which provides further information on how DBT

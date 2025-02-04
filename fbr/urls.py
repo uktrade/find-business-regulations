@@ -22,7 +22,7 @@ class DataResponseViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["get"], url_path="search")
     def search(self, request, *args, **kwargs):
         context = {
-            "service_name": settings.SERVICE_NAME_SEARCH,
+            "service_name": settings.SERVICE_NAME,
         }
 
         try:
@@ -88,14 +88,15 @@ urlpatterns = [
     path("download_csv/", search_views.download_csv, name="csvdata"),
     path("nojs/download_csv/", search_views.download_csv, name="csvdata"),
     path("document/<str:id>", search_views.document, name="document"),
-    path("healthcheck/", core_views.health_check, name="healthcheck"),
+    path("feedback/", core_views.feedback_view, name="feedback"),
+    path("privacy-notice/", core_views.privacy_notice, name="privacy-notice"),
     path(
         "accessibility-statement/",
         core_views.accessibility_statement,
         name="accessibility-statement",
     ),
-    path("privacy-notice/", core_views.privacy_notice, name="privacy-notice"),
     path("cookies/", core_views.cookies, name="cookies"),
+    path("disclaimer/", core_views.disclaimer, name="disclaimer"),
     path(
         "set-cookie-banner-preference/",
         core_views.set_cookie_banner_preference,
@@ -106,7 +107,7 @@ urlpatterns = [
         core_views.hide_cookie_banner,
         name="hide-cookie-banner",
     ),
-    path("feedback/", core_views.feedback_view, name="feedback"),
+    path("healthcheck/", core_views.health_check, name="healthcheck"),
 ]
 
 if settings.DJANGO_ADMIN:
