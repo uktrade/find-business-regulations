@@ -25,6 +25,7 @@ def feedback_view(request):
     """
     context = {
         "service_name": settings.SERVICE_NAME,
+        "service_name_long": settings.SERVICE_NAME_LONG,
     }
 
     if request.method == "POST":
@@ -86,6 +87,7 @@ def privacy_notice(request: HttpRequest) -> HttpResponse:
     """
     context = {
         "service_name": settings.SERVICE_NAME,
+        "service_name_long": settings.SERVICE_NAME_LONG,
     }
     return render(
         request, template_name="privacy_notice.html", context=context
@@ -107,6 +109,19 @@ def accessibility_statement(request: HttpRequest) -> HttpResponse:
     )
 
 
+@require_http_methods(["GET"])
+def disclaimer(request: HttpRequest) -> HttpResponse:
+    """Disclaimer.
+
+    Returns the disclaimer page.
+    """
+    context = {
+        "service_name": settings.SERVICE_NAME,
+        "service_name_long": settings.SERVICE_NAME_LONG,
+    }
+    return render(request, template_name="disclaimer.html", context=context)
+
+
 @require_http_methods(["GET", "POST"])
 def cookies(request: HttpRequest) -> HttpResponse:
     """Cookie policy page view.
@@ -116,6 +131,7 @@ def cookies(request: HttpRequest) -> HttpResponse:
     """
     context = {
         "service_name": settings.SERVICE_NAME,
+        "service_name_long": settings.SERVICE_NAME_LONG,
         "cookie_preference_name": settings.COOKIE_ACCEPTED_GA_NAME,
     }
     if request.method == "POST":

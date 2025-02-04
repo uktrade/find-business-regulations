@@ -22,7 +22,7 @@ def document(request: HttpRequest, id) -> HttpResponse:
     Handles the GET request to fetch details based on the provided id.
     """
     context = {
-        "service_name": settings.SERVICE_NAME_SEARCH,
+        "service_name": settings.SERVICE_NAME,
     }
 
     if not id:
@@ -74,7 +74,8 @@ def search_django(request: HttpRequest):
     search_term = request.GET.get("search", "")
 
     context = {
-        "service_name": settings.SERVICE_NAME_SEARCH,
+        "service_name": settings.SERVICE_NAME,
+        "service_name_long": settings.SERVICE_NAME_LONG,
         "form": form,
         "search_term": search_term,
     }
@@ -90,7 +91,10 @@ def search_react(request: HttpRequest) -> HttpResponse:
 
     Renders the React based search page.
     """
-    context = {"service_name": settings.SERVICE_NAME_SEARCH}
+    context = {
+        "service_name": settings.SERVICE_NAME,
+        "service_name_long": settings.SERVICE_NAME_LONG,
+    }
     return render(request, template_name="react-fbr.html", context=context)
 
 
@@ -117,7 +121,7 @@ def download_csv(request):
     """
     logger.debug("building CSV downloadable file")
     context = {
-        "service_name": settings.SERVICE_NAME_SEARCH,
+        "service_name": settings.SERVICE_NAME,
     }
 
     try:
