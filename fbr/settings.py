@@ -65,9 +65,10 @@ DEBUG = env("DEBUG", default=False)
 DJANGO_ADMIN = env("DJANGO_ADMIN", default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost"])
 
-ENVIRONMENT = env(
-    "COPILOT_ENVIRONMENT_NAME", default="local"
-)  # TODO: Change to APP_ENV, updates required in deploy repo
+# COPILOT_ENVIRONMENT_NAME is set by AWS Copilot
+# https://github.com/uktrade/find-business-regulations-deploy/tree/main/copilot/environments
+# Currently set as "dev", "staging" and "prod"
+ENVIRONMENT = env("COPILOT_ENVIRONMENT_NAME", default="local")
 
 # Application definition
 DJANGO_APPS = [
@@ -124,6 +125,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "fbr.context_processors.google_tag_manager",
+                "fbr.context_processors.environment",
             ],
         },
     },
