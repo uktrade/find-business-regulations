@@ -49,7 +49,6 @@ class DataResponseModel(models.Model):
         replaces: Indicates if the data response replaces another resource.
         related_legislation: Related legislation details for the data response.
         id: Primary key of the data response.
-        score: Score associated with the data response, default is 0.
     """
 
     title = models.TextField(null=True, blank=True)
@@ -83,4 +82,3 @@ class DataResponseModel(models.Model):
     replaces = models.TextField(null=True, blank=True)
     related_legislation = models.TextField(null=True, blank=True)
     id = models.TextField(primary_key=True)
-    score = models.IntegerField(null=True, blank=True, default=0)

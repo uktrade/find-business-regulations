@@ -295,6 +295,9 @@ LOGGING: dict[str, Any] = {
     },
 }
 
+if DEBUG:
+    LOGGING["loggers"]["django"]["level"] = "DEBUG"
+
 # Django Log Formatter ASIM settings
 # See https://github.com/uktrade/django-log-formatter-asim#settings
 DLFA_TRACE_HEADERS = ("X-B3-TraceId", "X-B3-SpanId")
