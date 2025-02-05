@@ -50,10 +50,6 @@ class Migration(migrations.Migration):
                     models.TextField(blank=True, null=True),
                 ),
                 ("id", models.TextField(primary_key=True, serialize=False)),
-                (
-                    "score",
-                    models.IntegerField(blank=True, default=0, null=True),
-                ),
             ],
         ),
     ]

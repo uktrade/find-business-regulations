@@ -246,5 +246,4 @@ class Legislation:
             "date_valid": valid_sort_date,
             "sort_date": valid_sort_date,
             "type": "Legislation",
-            "score": 0,
         }

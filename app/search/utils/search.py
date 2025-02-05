@@ -4,6 +4,7 @@
 import logging
 import re
 import time
+from typing import Tuple, Union
 
 from django.contrib.postgres.search import (
     SearchQuery,
@@ -15,41 +16,54 @@ from django.http import HttpRequest
 
 from app.search.config import SearchDocumentConfig
 from app.search.models import DataResponseModel
-from app.search.utils.documents import calculate_score
+from app.search.utils.calculate_score import calculate_score
 from app.search.utils.paginate import paginate
 
 logger = logging.getLogger(__name__)
 
 
-def create_search_query(search_string):
+def create_search_query(
+    search_string: str, ext_search_results: bool = False
+) -> Union[SearchQuery, Tuple[SearchQuery, int, int, int]]:
     """
     Create a search query from a search string with
     implicit AND for space-separated words
     and explicit AND/OR operators.
 
     :param search_string: The search string to parse
-    :return: A combined SearchQuery object
+    :param ext_search_results: A flag to return additional search results
+    :return: A combined SearchQuery object or a tuple with the query and counts
     """
     # Split the string into tokens, handling quoted phrases and operators
     tokens = re.findall(r'"[^"]+"|\bAND\b|\bOR\b|\w+', search_string)
 
     # Validate tokens to avoid issues with syntax
     if not tokens:
-        return None  # Return None for empty or invalid input
+        return (
+            None if not ext_search_results else (None, 0, 0, 0)
+        )  # Return None for empty or invalid input
 
     # Initialize variables
     query = None
-    current_operator = "&"  # Default to implicit AND for space-separated words
+    current_operator = "|"  # Default to implicit OR for space-separated words
 
     # Process tokens
+    num_ands = 0
+    num_ors = 0
+    num_phrases = 0
     for token in tokens:
         if token.upper() == "AND":
             current_operator = "&"
+            num_ands += 1
         elif token.upper() == "OR":
             current_operator = "|"
+            num_ors += 1
         else:
             # Handle phrases and plain text
             is_phrase = token.startswith('"') and token.endswith('"')
+            if is_phrase:
+                num_phrases += 1
+
             clean_token = token.strip('"')
             new_query = SearchQuery(
                 clean_token, search_type="phrase" if is_phrase else "plain"
@@ -64,20 +78,30 @@ def create_search_query(search_string):
                 elif current_operator == "|":
                     query = query | new_query
 
-            # Reset the operator to implicit AND for the next token
-            current_operator = "&"
+            # Reset the operator to implicit OR for the next token
+            current_operator = "|"
+
+    if ext_search_results:
+        return query, num_ands, num_ors, num_phrases
 
     return query
 
 
 def search_database(config: SearchDocumentConfig):
     """
-    Search the database for documents based on the search query.
+    Search for documents based on various criteria including ID, query string,
+    document type, publisher, and sort preferences. Implements both strict
+    and partial search capabilities.
 
-    :param config: The search configuration object
-    :return: A QuerySet of DataResponseModel objects
+    Args:
+        config (SearchDocumentConfig): An object containing search configuration
+            data such as query string, ID, document types, publishers, and sorting
+            preferences.
+
+    Returns:
+        QuerySet: A Django QuerySet containing the filtered and optionally sorted
+        search results.
     """
-
     # If an ID is provided, return the document with that ID
     if config.id:
         logger.debug(f"searching for document with id: {config.id}")
@@ -92,15 +116,27 @@ def search_database(config: SearchDocumentConfig):
     logger.debug(f"sanitized search query: {query_str}")
 
     # Generate query object
-    query_objs = create_search_query(query_str)
-    logger.debug(f"search query objects: {query_objs}")
+    try:
+        query_objs, num_ands, num_ors, num_phrases = create_search_query(
+            query_str, True
+        )
+        logger.debug(f"search query objects: {query_objs}")
+    except Exception as e:
+        logger.error(f"error creating search query: {e}")
+        query_objs = None
+        num_ands = 0
+        num_ors = 0
+        num_phrases = 0
 
     # Search across specific fields
     vector = SearchVector("title", "description", "regulatory_topics")
-    queryset = DataResponseModel.objects.all()
 
+    # Get all documents from the queryset
+    queryset = DataResponseModel.objects.all()
+    queryset = queryset.annotate(search=vector)
+
+    # Use the parsed query objects for strict filtering
     if query_objs:
-        # Use the parsed query objects for strict filtering
         queryset = queryset.annotate(search=vector).filter(
             Q(search=query_objs)
         )
@@ -108,16 +144,28 @@ def search_database(config: SearchDocumentConfig):
         queryset = queryset.annotate(search=vector)
 
     # Add partial matches for fallback, if desired
-    # if config.search_query:
-    # query_chunks = query_str.split()
-    # partial_matches = Q()
-    # for chunk in query_chunks:
-    #     partial_matches |= (
-    #         Q(title__icontains=chunk)
-    #         | Q(description__icontains=chunk)
-    #         | Q(regulatory_topics__icontains=chunk)
-    #     )
-    # queryset = queryset.filter(partial_matches)
+    if (
+        query_str
+        and queryset.count()
+        and num_ands == 0
+        and num_ors == 0
+        and num_phrases == 0
+    ):
+        logger.debug(
+            "adding partial matches to search query as "
+            "query string brought no results for strict search"
+        )
+        queryset = DataResponseModel.objects.all()
+        query_chunks = query_str.split()
+        partial_matches = Q()
+        for chunk in query_chunks:
+            partial_matches |= (
+                Q(title__icontains=chunk)
+                | Q(description__icontains=chunk)
+                | Q(regulatory_topics__icontains=chunk)
+            )
+        queryset = queryset.filter(partial_matches)
+        logger.debug("queryset values after partial matches: %s", queryset)
 
     # Filter by document types
     if config.document_types:
@@ -138,8 +186,12 @@ def search_database(config: SearchDocumentConfig):
         return queryset.order_by("-sort_date")
 
     if config.sort_by == "relevance":
-        calculate_score(config, queryset)
-        return queryset.order_by("-score")
+        try:
+            # Calculate the score for each document based on the search query
+            query_str = re.sub(r"[^a-zA-Z0-9\s]", "", query_str)
+            queryset = calculate_score(queryset, query_str)
+        except Exception as e:
+            logger.error(f"error calculating score for search: {e}")
 
     return queryset
 

@@ -1,10 +1,7 @@
 import base64
-import re
 import uuid
 
 from numpy.f2py.auxfuncs import throw_error
-
-from django.db.models import QuerySet
 
 from app.search.models import DataResponseModel, logger
 
@@ -74,50 +71,6 @@ def insert_or_update_document(document_json):
             logger.error(f"error updating document: {document_json}")
             logger.error(f"error: {e}")
             throw_error(f"error updating document: {document_json}")
-
-
-def calculate_score(config, queryset: QuerySet):
-    """
-    Calculate the search relevance score for each document in the queryset.
-
-    Args:
-        config: Configuration object containing the search query settings.
-        queryset: QuerySet of documents to be scored.
-
-    The function tokenizes the search query, filters out "AND" and "OR",
-    and computes the score for each document based on the frequency of
-    search terms in the document's title and description.
-    """
-
-    def _extract_terms(search_query):
-        # Use regex to find words and phrases, ignoring AND and OR
-        tokens = re.findall(r'"[^"]+"|\b\w+\b', search_query)
-
-        # Filter out AND and OR
-        terms = [
-            token.strip('"') for token in tokens if token not in ("AND", "OR")
-        ]
-        return terms
-
-    search_query = config.search_query
-
-    if not search_query:
-        return
-
-    search_query = _extract_terms(search_query)
-
-    # Get all documents from the queryset
-    documents = list(queryset)
-
-    # Iterate over each document and calculate the score
-    for document in documents:
-        title = document.title or ""
-        description = document.description or ""
-        combined_content = title.lower() + " " + description.lower()
-        document.score = sum(
-            combined_content.count(term.lower()) for term in search_query
-        )
-        document.save()
 
 
 def generate_short_uuid():
