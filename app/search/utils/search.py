@@ -8,7 +8,6 @@ from typing import Tuple, Union
 
 from django.contrib.postgres.search import (
     SearchQuery,
-    SearchRank,
     SearchVector,
 )  # noqa
 from django.db.models import F, Func, Q, QuerySet

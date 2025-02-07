@@ -5,12 +5,11 @@ import time
 
 import requests  # type: ignore
 
-from bs4 import BeautifulSoup
-
 from app.search.utils.date import convert_date_string_to_obj
 from app.search.utils.documents import (  # noqa: E501
     generate_short_uuid,
     insert_or_update_document,
+    update_related_legislation_titles,
 )
 
 logger = logging.getLogger(__name__)
@@ -39,43 +38,6 @@ def _build_like_conditions(field, and_terms, or_terms):
     return " OR ".join([f"{field} LIKE LOWER('%{term}%')" for term in terms])
 
 
-def _fetch_title_from_url(url):
-    """
-    Fetches the title from the given URL.
-
-    Args:
-        url (str): The URL to fetch the title from.
-
-    Returns:
-        str: The title extracted from the meta tag or the page title.
-    """
-    try:
-        # Ensure the URL has a schema
-        if not url.startswith(("http://", "https://")):
-            url = "https://" + url
-
-        response = requests.get(url, timeout=2)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.content, "html.parser")
-
-        # Try to find the DC.title meta tag
-        title_tag = soup.find("meta", {"name": "DC.title"})
-        if title_tag and title_tag.get("content"):
-            return title_tag["content"]
-
-        # If DC.title is not found, search for pageTitle in the body
-        page_title = soup.select_one("#layout1 #layout2 #pageTitle")
-        if page_title:
-            return page_title.get_text(strip=True)
-
-        logger.warning(f"title not found in {url}")
-    except Exception as e:
-        logger.error(f"error fetching title from {url}: {e}")
-
-    # No title found therefore return empty string
-    return ""
-
-
 class PublicGateway:
     def __init__(self):
         """
@@ -85,8 +47,8 @@ class PublicGateway:
             base_url (str): The base URL of the Trade Data API.
         """
         self._base_url = (
-            "https://data.api.trade.gov.uk/v1/datasets/fbr-regulations"
-            "/versions/v1.0.1/data"
+            "https://data.api.trade.gov.uk/v1/datasets/orp-regulations"
+            "/versions/latest/data"
         )
 
     def build_cache(self, config):
@@ -105,6 +67,8 @@ class PublicGateway:
             timeout=config.timeout,  # nosec BXXX
         )
 
+        inserted_document_count = 1
+
         # End time
         end_time = time.time()
         initial_request_system_time = end_time - start_time
@@ -121,7 +85,7 @@ class PublicGateway:
             # Now you can use `data` as a usual Python dictionary
             # Convert each row into DataResponseModel object
             total_documents = len(data.get("uk_regulatory_documents"))
-            inserted_document_count = 1
+
             for row in data.get("uk_regulatory_documents"):
                 # Start time
                 start_time = time.time()
@@ -159,23 +123,14 @@ class PublicGateway:
                         "related_legislation"
                     ].split("\n")
 
-                    related_legislation = []
-                    for url in related_legislation_urls:
-                        try:
-                            title = _fetch_title_from_url(url)
-                        except Exception as e:
-                            logger.error(
-                                f"error fetching title from {url}: {e}"
-                            )
-                            title = ""
-
-                        related_legislation.append(
-                            {
-                                "url": url,
-                                "title": title if title != "" else url,
-                            }
-                        )
-                    row["related_legislation"] = related_legislation
+                    row["related_legislation"] = [
+                        {
+                            "url": url.strip(),
+                            "title": "",
+                        }
+                        for url in related_legislation_urls
+                        if isinstance(url, str) and url.strip()
+                    ]
 
                 # End time
                 end_time = time.time()
@@ -186,8 +141,29 @@ class PublicGateway:
                 )
                 insert_or_update_document(row)
                 inserted_document_count += 1
-            return response.status_code, inserted_document_count
         else:
             logger.error(
                 f"error fetching data from orpd: {response.status_code}"
             )
+            return 500, inserted_document_count
+
+        # Update titles
+        process_code = response.status_code
+        try:
+            logger.debug("updating related legislation titles...")
+            update_titles_start_time = time.time()
+            update_related_legislation_titles(config)
+            update_titles_end_time = time.time()
+            update_titles_system_time = (
+                update_titles_end_time - update_titles_start_time
+            )
+            logger.info(
+                f"updating related legislation titles took "
+                f"{update_titles_system_time} seconds"
+            )
+        except Exception as e:
+            logger.error(f"error updating related legislation titles: {e}")
+            process_code = 500
+
+        # return process_code, inserted_document_count
+        return process_code, inserted_document_count

@@ -1,6 +1,10 @@
 import base64
+import json
 import uuid
 
+import requests  # type: ignore
+
+from bs4 import BeautifulSoup
 from numpy.f2py.auxfuncs import throw_error
 
 from app.search.models import DataResponseModel, logger
@@ -23,7 +27,69 @@ def clear_all_documents():
         logger.debug("documents cleared from table")
     except Exception as e:
         logger.error(f"error clearing documents: {e}")
-        throw_error(f"error clearing documents: {e}")
+
+
+def _fetch_title_from_url(config, url):
+    """
+    Fetches the title from the given URL.
+
+    Args:
+        url (str): The URL to fetch the title from.
+
+    Returns:
+        str: The title extracted from the meta tag or the page title.
+    """
+    try:
+        # Ensure the URL has a schema
+        if not url.startswith(("http://", "https://")):
+            url = "https://" + url
+
+        logger.debug(f"fetching title from {url}")
+        response = requests.get(url, timeout=config.timeout)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.content, "html.parser")
+
+        # Try to find the DC.title meta tag
+        title_tag = soup.find("meta", {"name": "DC.title"})
+        if title_tag and title_tag.get("content"):
+            return title_tag["content"]
+
+        # If DC.title is not found, search for pageTitle in the body
+        page_title = soup.select_one("#layout1 #layout2 #pageTitle")
+        if page_title:
+            return page_title.get_text(strip=True)
+
+        logger.warning(f"title not found in {url}")
+    except Exception as e:
+        logger.error(f"error fetching title from {url}: {e}")
+
+    # No title found therefore return empty string
+    return ""
+
+
+def update_related_legislation_titles(config):
+    try:
+        documents = DataResponseModel.objects.all()
+
+        for document in documents:
+            related = document.related_legislation
+            json_compatible_string = related.replace("'", '"')
+            related_legislation_list = json.loads(json_compatible_string)
+
+            logger.debug(
+                f"related_legislation_list: {related_legislation_list}"
+            )
+
+            for related in related_legislation_list:
+                found_title = _fetch_title_from_url(config, related["url"])
+                logger.debug(f"found title: {found_title}")
+                related["title"] = found_title
+
+            document.related_legislation = json.dumps(related_legislation_list)
+            document.save()
+    except Exception as e:
+        logger.error(f"error updating related legislation titles: {e}")
+        throw_error(f"error updating related legislation titles: {e}")
 
 
 def insert_or_update_document(document_json):
