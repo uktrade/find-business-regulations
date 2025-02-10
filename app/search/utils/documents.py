@@ -23,7 +23,6 @@ def clear_all_documents():
         logger.debug("documents cleared from table")
     except Exception as e:
         logger.error(f"error clearing documents: {e}")
-        throw_error(f"error clearing documents: {e}")
 
 
 def insert_or_update_document(document_json):

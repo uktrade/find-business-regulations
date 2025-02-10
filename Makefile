@@ -139,6 +139,7 @@ rebuild_cache:
 	export PYTHONPATH=. && \
 	export DJANGO_SETTINGS_MODULE='fbr.settings' && \
 	export DATABASE_URL=postgres://postgres:postgres@localhost:5432/fbr && \
+	export DEBUG=True && \
 	poetry install && \
 	poetry run rebuild-cache
 

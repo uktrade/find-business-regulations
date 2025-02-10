@@ -32,7 +32,7 @@ def document(request: HttpRequest, id) -> HttpResponse:
     # Create a search configuration object with the provided id
     config = SearchDocumentConfig(search_query="", id=id)
     config.sanitize_all_if_needed()
-    config.print_to_log()
+    config.print_to_log("document endpoint")
 
     try:
         queryset = search_database(config)
