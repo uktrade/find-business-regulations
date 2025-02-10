@@ -200,9 +200,7 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
 CELERY_RESULT_EXTENDED = True
-CELERY_TASK_TIME_LIMIT = (
-    3600  # Maximum runtime for a task in seconds (e.g., 3600/60 = 60 minutes)
-)
+CELERY_TASK_TIME_LIMIT = 14400  # Maximum runtime for a task in seconds (e.g., 14400/60 = 240 minutes)
 CELERY_TASK_SOFT_TIME_LIMIT = (
     270  # Optional: Grace period before forced termination
 )

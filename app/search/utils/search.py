@@ -225,7 +225,7 @@ def search(
     config.sanitize_all_if_needed()
 
     # Display the search query in the log
-    config.print_to_log()
+    config.print_to_log("search")
 
     # Search across specific fields
     results = search_database(config)

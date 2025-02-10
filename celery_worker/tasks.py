@@ -15,7 +15,8 @@ def rebuild_cache():
     try:
         start = time.time()
         clear_all_documents()
-        config = SearchDocumentConfig(search_query="", timeout=10)
+        config = SearchDocumentConfig(search_query="", timeout=120)
+        config.print_to_log("celery task")
 
         legislation_start = time.time()
         Legislation().build_cache(config)
