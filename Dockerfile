@@ -45,7 +45,7 @@ RUN pip install poetry
 COPY requirements.txt /app/
 
 # Install the dependencies specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --ignore-installed -r requirements.txt
 
 COPY . /app
 

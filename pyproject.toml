@@ -39,6 +39,7 @@ notifications-python-client = "^10.0.1"
 django-extensions = "^3.2.3"
 werkzeug = "^3.1.3"
 pyopenssl = "^24.3.0"
+locust = "^2.32.9"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.7.1"
