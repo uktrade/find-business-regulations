@@ -119,3 +119,9 @@ With your Poetry shell active:
 > If you want to migrate a single app then navigate /find-business-regulations/fbr and use the following command:
 
     $ poetry run python manage.py migrate <app_name>
+
+
+### Run locust tests
+Navigate to root directory of the project and run the following command:
+
+    $ locust -f ./tests/performance/locustfile.py --users 10 --spawn-rate 1
