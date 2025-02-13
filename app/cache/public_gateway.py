@@ -3,8 +3,6 @@ import logging
 import re
 import time
 
-import requests  # type: ignore
-
 from bs4 import BeautifulSoup
 
 from app.search.utils.date import convert_date_string_to_obj
@@ -12,6 +10,7 @@ from app.search.utils.documents import (  # noqa: E501
     generate_short_uuid,
     insert_or_update_document,
 )
+from app.search.utils.retrieve_data import get_data_from_url
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +38,7 @@ def _build_like_conditions(field, and_terms, or_terms):
     return " OR ".join([f"{field} LIKE LOWER('%{term}%')" for term in terms])
 
 
-def _fetch_title_from_url(url):
+def _fetch_title_from_url(config, url):
     """
     Fetches the title from the given URL.
 
@@ -54,13 +53,23 @@ def _fetch_title_from_url(url):
         if not url.startswith(("http://", "https://")):
             url = "https://" + url
 
-        response = requests.get(url, timeout=2)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.content, "html.parser")
+        data = get_data_from_url(config, url, "oprd/gw")
+
+        if data:
+            logger.debug(f"data from {url}: {data}")
+
+        soup = BeautifulSoup(data, "html.parser")
 
         # Try to find the DC.title meta tag
         title_tag = soup.find("meta", {"name": "DC.title"})
-        if title_tag and title_tag.get("content"):
+        if title_tag:
+            logger.debug(f"title found in {url}: {title_tag}")
+
+        content = title_tag.get("content")
+        if content:
+            logger.debug(f"content found in {url}: {content}")
+
+        if title_tag and content:
             return title_tag["content"]
 
         # If DC.title is not found, search for pageTitle in the body
@@ -98,12 +107,10 @@ class PublicGateway:
         # Start time
         start_time = time.time()
 
-        # Make the GET request
-        response = requests.get(
-            self._base_url,
-            params=params,
-            timeout=config.timeout,  # nosec BXXX
+        data = get_data_from_url(
+            config, self._base_url, "exception raised fetching", params
         )
+        inserted_document_count = 1
 
         # End time
         end_time = time.time()
@@ -115,13 +122,13 @@ class PublicGateway:
         )
 
         # Check if the request was successful
-        if response.status_code == 200:
-            data = json.loads(response.text)
+        if data:
+            data = json.loads(data)
 
             # Now you can use `data` as a usual Python dictionary
             # Convert each row into DataResponseModel object
             total_documents = len(data.get("uk_regulatory_documents"))
-            inserted_document_count = 1
+
             for row in data.get("uk_regulatory_documents"):
                 # Start time
                 start_time = time.time()
@@ -161,12 +168,27 @@ class PublicGateway:
 
                     related_legislation = []
                     for url in related_legislation_urls:
+                        if url == "":
+                            logger.warning(
+                                f"empty URL found in related_legislation "
+                                f"for row {row["id"]}. skipping..."
+                            )
+                            continue
                         try:
-                            title = _fetch_title_from_url(url)
+                            title = _fetch_title_from_url(config, url)
+
+                            if title is None:
+                                logger.warning(
+                                    f"no title found for {url}. "
+                                    f"title set to empty string"
+                                )
+                                title = ""
                         except Exception as e:
                             logger.error(
-                                f"error fetching title from {url}: {e}"
+                                f"(fetch title from url) error fetching "
+                                f"title from {url}: {e}"
                             )
+
                             title = ""
 
                         related_legislation.append(
@@ -186,8 +208,9 @@ class PublicGateway:
                 )
                 insert_or_update_document(row)
                 inserted_document_count += 1
-            return response.status_code, inserted_document_count
         else:
-            logger.error(
-                f"error fetching data from orpd: {response.status_code}"
-            )
+            logger.error("error fetching data from orpd: no data received")
+            return 500, 0
+
+        # return process_code, inserted_document_count
+        return 200, inserted_document_count

@@ -20,10 +20,27 @@ def rebuild_cache():
     try:
         start = time.time()
         clear_all_documents()
-        config = SearchDocumentConfig(search_query="", timeout=1)
+        config = SearchDocumentConfig(search_query="", timeout=120)
+        config.print_to_log("non-celery task")
+
+        legislation_start = time.time()
         Legislation().build_cache(config)
+        legislation_end = time.time()
+        legislation_total = legislation_end - legislation_start
+
+        public_gateway_start = time.time()
         PublicGateway().build_cache(config)
+        public_gateway_end = time.time()
+        public_gateway_total = public_gateway_end - public_gateway_start
+
         end = time.time()
-        return {"message": "rebuilt cache", "duration": round(end - start, 2)}
+        return {
+            "message": "rebuilt cache",
+            "total duration": round(end - start, 2),
+            "details": {
+                "legislation": round(legislation_total, 2),
+                "public_gateway": round(public_gateway_total, 2),
+            },
+        }
     except Exception as e:
-        return {"message": f"error clearing documents: {e}"}
+        return {"message": f"cache rebuild failed: {e}"}

@@ -12,29 +12,32 @@ from app.search.utils.documents import clear_all_documents
 
 @shared_task(name="celery_worker.tasks.rebuild_cache")
 def rebuild_cache():
-    """
-    Rebuilds the cache for search documents across various components by
-    clearing all existing documents. The process is timed, and the
-    duration is included in the success response. If an exception occurs,
-    an error message is returned.
-
-    Returns:
-        dict: A dictionary containing either a success message with the
-        duration of the cache rebuilding process or an error message
-        detailing the exception that was raised.
-    """
     try:
         start = time.time()
         clear_all_documents()
-        config = SearchDocumentConfig(search_query="", timeout=2)
-        PublicGateway().build_cache(config)
+        config = SearchDocumentConfig(search_query="", timeout=120)
+        config.print_to_log("celery task")
+
+        legislation_start = time.time()
         Legislation().build_cache(config)
+        legislation_end = time.time()
+        legislation_total = legislation_end - legislation_start
+
+        public_gateway_start = time.time()
+        PublicGateway().build_cache(config)
+        public_gateway_end = time.time()
+        public_gateway_total = public_gateway_end - public_gateway_start
+
         end = time.time()
-        message = {
-            "message": "rebuilt cache",
-            "duration": round(end - start, 2),
-        }
-        print(message)
+        print(
+            {
+                "message": "rebuilt cache",
+                "total duration": round(end - start, 2),
+                "details": {
+                    "legislation": round(legislation_total, 2),
+                    "public_gateway": round(public_gateway_total, 2),
+                },
+            }
+        )
     except Exception as e:
-        message = {"message": f"error building cache data: {e}"}
-        print(message)
+        print({"message": f"cache rebuild failed: {e}"})

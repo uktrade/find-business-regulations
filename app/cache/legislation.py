@@ -17,41 +17,9 @@ from app.search.utils.documents import (  # noqa: E501
     generate_short_uuid,
     insert_or_update_document,
 )
+from app.search.utils.retrieve_data import get_data_from_url
 
 logger = logging.getLogger(__name__)
-
-
-def _get_url_data(config, url):
-    """
-    Fetch data from a given URL and return the response text if successful,
-    otherwise log the error.
-
-    Parameters:
-    - config: Configuration object that includes the request timeout.
-    - url: String representing the URL to request.
-
-    Returns:
-    - Response text if the status code is 200.
-    - None if the response status code is not 200, or if there is an exception
-        during the request.
-
-    Logs:
-    - Error messages for request failures and non-200 response codes.
-    """
-    try:
-        response = requests.get(url, timeout=config.timeout)  # nosec BXXX
-        if response.status_code == 200:
-            return response.text
-
-        # If the status code is not 200, log the error
-        logger.error(
-            f"error fetching legislation data "
-            f"[{response.status_code}]: {response.reason}"
-        )
-        return None
-    except requests.exceptions.RequestException as e:
-        logger.error(f"error fetching legislation data: {e}")
-        return e
 
 
 def _get_text_from_element(element: Optional[ET.Element]) -> Optional[str]:
@@ -70,7 +38,30 @@ def _get_text_from_element(element: Optional[ET.Element]) -> Optional[str]:
         Optional[str]:
             The text content of the element if it exists, otherwise None.
     """
-    return element.text if element is not None else None
+    try:
+        return element.text if element is not None else None
+    except Exception as e:
+        logger.error(f"error extracting text from element: {e}")
+        return None
+
+
+def _update_result_dict(result_dict: dict, url, key: str, value):
+    """
+    Update the result dictionary with the given key and value.
+
+    Parameters:
+    - result_dict: Dictionary to update.
+    - key: Key to update in the dictionary.
+    - value: Value to assign to the key in the dictionary.
+
+    Returns:
+    - None
+    """
+
+    datum = {"key": key, "value": value}
+    if url not in result_dict:
+        result_dict[url] = []
+    result_dict[url].append(datum)
 
 
 class Legislation:
@@ -123,56 +114,89 @@ class Legislation:
         logger.info("building legislation cache...")
         dataset = construction_legislation_dataframe()
 
-        failed_url_fetches = []
+        results_dict = {}  # type: ignore
 
         # For each row, get the URL from the column named
         # 'URI to Extract XML Data'
         # and store the XML data in a list
         for index, row in dataset.iterrows():
-            url = row["URI to Extract XML Data"]
+            base_url = row["URI to Extract XML Data"]
             logger.info(
                 f"fetching data from page {index + 1} / "
-                f"{len(dataset)}: {url}..."
+                f"{len(dataset)}: {base_url}..."
             )
 
             try:
-                data = _get_url_data(config, url)
+                data = get_data_from_url(config, base_url, "legislation")
 
                 if data is None:
-                    logger.error(
-                        f"error fetching data from {url}. no data returned"
-                    )
-                    raise Exception(
-                        f"error fetching data from {url}. no data returned"
-                    )
+                    _update_result_dict(results_dict, base_url, "FAILED", "no data returned")
+                    if index == len(dataset) - 1:
+                        logger.error("no more URLs to fetch. exiting the process...")
+                        break
+                    logger.warning("trying to fetch data from the next URL...")
+                    continue
 
                 if data:
-                    logger.info(f"parsing data from {url}...")
+                    logger.debug(f"parsing data from {base_url}...")
                     root = ET.fromstring(data)  # nosec BXXX
+
                     identifier = _get_text_from_element(
                         root.find(".//dc:identifier", self._namespaces)
                     )  # nosec BXXX
+                    _update_result_dict(results_dict, base_url,
+                                        ".//dc:identifier", "key not found"
+                                        if identifier is None else identifier)
+
+
                     title = _get_text_from_element(
                         root.find(".//dc:title", self._namespaces)
                     )  # nosec BXXX
+                    _update_result_dict(results_dict, base_url,
+                                        ".//dc:title", "key not found"
+                                        if title is None else title)
+
                     description = _get_text_from_element(
                         root.find(".//dc:description", self._namespaces)
                     )  # nosec BXXX
+                    _update_result_dict(results_dict, base_url,
+                                        ".//dc:description", "key not found"
+                                        if description is None else description)
+
                     format = _get_text_from_element(
                         root.find(".//dc:format", self._namespaces)
                     )  # nosec BXXX
+                    _update_result_dict(results_dict, base_url,
+                                        ".//dc:format", "key not found"
+                                        if format is None else format)
+
                     language = _get_text_from_element(
                         root.find(".//dc:language", self._namespaces)
                     )  # nosec BXXX
+                    _update_result_dict(results_dict, base_url,
+                                        ".//dc:language", "key not found"
+                                        if language is None else language)
+
                     publisher = _get_text_from_element(
                         root.find(".//dc:publisher", self._namespaces)
                     )  # nosec BXXX
+                    _update_result_dict(results_dict, base_url,
+                                        ".//dc:publisher", "key not found"
+                                        if publisher is None else publisher)
+
                     modified = _get_text_from_element(
                         root.find(".//dc:modified", self._namespaces)
                     )  # nosec BXXX
+                    _update_result_dict(results_dict, base_url,
+                                        ".//dc:modified", "key not found"
+                                        if modified is None else modified)
+
                     valid = _get_text_from_element(
                         root.find(".//dct:valid", self._namespaces)
                     )  # nosec BXXX
+                    _update_result_dict(results_dict, base_url,
+                                        ".//dct:valid", "key not found"
+                                        if valid is None else valid)
 
                     document_json = self._to_json(
                         description,
@@ -187,15 +211,25 @@ class Legislation:
 
                     # Insert or update the document
                     insert_or_update_document(document_json)
-
-                # # Sleep for a short time to avoid rate limiting
-                # time.sleep(0.5)
             except Exception as e:
-                logger.error(f"error fetching data from {url}: {e}")
-                failed_url_fetches.append(url)
+                _update_result_dict(results_dict, base_url, "FAILED-EXCEPTION", e)
 
-        if failed_url_fetches:
-            logger.warning(f"failed to fetch data {len(failed_url_fetches)} legislation sources: {failed_url_fetches}")
+                logger.error(f"error fetching data from {base_url}: {e}")
+                if index == len(dataset) - 1:
+                    logger.error("no more URLs to fetch. exiting the process...")
+                    break
+                logger.warning("trying to fetch data from the next URL...")
+                continue
+
+        total_urls = len(results_dict)
+        failed_urls = len([url for url in results_dict if results_dict[url] is not None])
+        failed_exception_urls = len([url for url in results_dict
+                                     if results_dict[url] is not None
+                                     and "FAILED-EXCEPTION" in results_dict[url]])
+        logger.info(f"total URLs: {total_urls}")
+        logger.warning(f"failed URLs: {failed_urls}")
+        logger.warning(f"failed URLs with exception: {failed_exception_urls}")
+
     def _to_json(
         self,
         description,

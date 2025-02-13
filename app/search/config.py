@@ -157,7 +157,7 @@ class SearchDocumentConfig:
         logger.debug("search parameters are valid")
         return True
 
-    def print_to_log(self):
+    def print_to_log(self, type: str = "default"):
         """
 
         Logs the current state of various search parameters.
@@ -184,4 +184,6 @@ class SearchDocumentConfig:
             "sort_by": self.sort_by,
             "id": self.id,
         }
-        logger.info(f"configuration from request: {json_output}")
+        logger.info(
+            f"service [{type}] - configuration from request: {json_output}"
+        )
