@@ -1,4 +1,5 @@
 import csv
+import http
 import json
 import logging
 
@@ -17,16 +18,35 @@ logger = logging.getLogger(__name__)
 @require_http_methods(["GET"])
 def document(request: HttpRequest, id) -> HttpResponse:
     """
-    Document details view.
+    Handles the request to retrieve and display a document based on an
+    identifier (id). It validates the presence of the id parameter, sanitizes
+    inputs, performs a database search, and prepares the context to render the
+    results. If the requested document is not found or an error occurs,
+    appropriate error details are included in the response.
 
-    Handles the GET request to fetch details based on the provided id.
+    Args:
+        request (HttpRequest): The HTTP request object containing metadata,
+            user data, and cookies related to the HTTP request.
+        id (str): The identifier for the document to be retrieved. It is
+            mandatory for processing the request.
+
+    Returns:
+        HttpResponse: The HTTP response containing the rendered template with
+            the provided context data. It includes the document details, status
+            codes, or error information based on the request's outcome.
+
+    Raises:
+        Exception: Captures and logs any unexpected errors occurring during the
+            execution of the function.
     """
     context = {
         "service_name": settings.SERVICE_NAME,
     }
 
     if not id:
-        context["error"] = "id parameter is required"
+        context["result"] = {}
+        context["result"]["error"] = "id parameter is required"
+        context["result"]["status_code"] = http.HTTPStatus.BAD_REQUEST
         return render(request, template_name="document.html", context=context)
 
     # Create a search configuration object with the provided id
@@ -36,10 +56,21 @@ def document(request: HttpRequest, id) -> HttpResponse:
 
     try:
         queryset = search_database(config)
+
+        if not queryset:
+            context["result"] = {}
+            context["result"]["title"] = "document does not exist"
+            context["result"]["error"] = "document not found"
+            context["status_code"] = http.HTTPStatus.NOT_FOUND
+            return render(
+                request, template_name="document.html", context=context
+            )
+
         context["result"] = queryset.first()
         context["result"].regulatory_topics = context[
             "result"
         ].regulatory_topics.split("\n")
+        context["status_code"] = http.HTTPStatus.OK
 
         # Parse the related_legislation field
         related_legislation_str = context["result"].related_legislation

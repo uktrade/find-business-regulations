@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 from app.search.utils.date import convert_date_string_to_obj
 from app.search.utils.documents import (  # noqa: E501
-    generate_short_uuid,
+    generate_uuid,
     insert_or_update_document,
 )
 from app.search.utils.retrieve_data import get_data_from_url
@@ -148,7 +148,8 @@ class PublicGateway:
                 row["date_valid"] = convert_date_string_to_obj(
                     row.get("date_valid")
                 )
-                row["id"] = generate_short_uuid()
+
+                row["id"] = generate_uuid(text=row.get("title", "").lower())
 
                 row["publisher_id"] = (
                     None

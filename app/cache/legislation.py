@@ -14,7 +14,7 @@ from app.cache.construction_legislation import construction_legislation_datafram
 from app.search.config import SearchDocumentConfig
 from app.search.utils.date import convert_date_string_to_obj
 from app.search.utils.documents import (  # noqa: E501
-    generate_short_uuid,
+    generate_uuid,
     insert_or_update_document,
 )
 from app.search.utils.retrieve_data import get_data_from_url
@@ -207,6 +207,7 @@ class Legislation:
                         publisher,
                         title,
                         valid,
+                        base_url
                     )
 
                     # Insert or update the document
@@ -240,6 +241,7 @@ class Legislation:
         publisher,
         title,
         valid,
+        url,
     ):
         """
         Converts given parameters into a JSON-like dictionary format.
@@ -261,7 +263,7 @@ class Legislation:
         valid_sort_date = modified if valid is None or valid == "" else valid
 
         return {
-            "id": generate_short_uuid(),
+            "id": generate_uuid(text = url.lower()),
             "title": title,
             "identifier": identifier,
             "publisher": publisher,
