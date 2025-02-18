@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import uuid
 
 from numpy.f2py.auxfuncs import throw_error
@@ -72,14 +73,44 @@ def insert_or_update_document(document_json):
             throw_error(f"error updating document: {document_json}")
 
 
-def generate_short_uuid():
+def generate_uuid(text: str = "", short: bool = True) -> str:
     """
-    Generates a short, URL-safe UUID.
+    Generates a short, unique identifier (UUID) in base64 format, optionally
+    derived from a given string identifier.
+
+    This function provides a shorthand, URL-safe UUID either by encoding a
+    randomly generated UUID or a namespace-based UUID derived from a provided
+    string identifier.
+
+    Args:
+        text: str, optional
+            A string identifier used to derive a namespace-based UUID. If not
+            provided or invalid, a random UUID is generated.
+        short: bool, optional
+            A flag indicating whether the UUID should be shortened to a
+            URL-safe format. Defaults to True.
 
     Returns:
-        str: A URL-safe base64 encoded UUID truncated to 22 characters.
+        str: A shortened, URL-safe representation of a UUID in base64 format.
     """
+
+    def _is_id_valid(id: str) -> bool:
+        return isinstance(id, str) and bool(id)
+
+    def _generate_hash(text: str) -> str:
+        return hashlib.sha256(text.encode()).hexdigest()
+
+    # If id is provided, use it to generate the UUID using a hash function
+    if _is_id_valid(text):
+        hash_value = _generate_hash(text)
+        return hash_value[
+            :22
+        ]  # Shorten as needed, typically more than 22 characters are
+
     uid = uuid.uuid4()
+
+    if not short:
+        return uid.hex
 
     # Encode it to base64
     uid_b64 = base64.urlsafe_b64encode(uid.bytes).rstrip(b"=").decode("ascii")
