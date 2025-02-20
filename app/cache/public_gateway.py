@@ -149,7 +149,11 @@ class PublicGateway:
                     row.get("date_valid")
                 )
 
-                row["id"] = generate_uuid(text=row.get("title", "").lower())
+                row["sort_date"] = row["date_valid"]
+
+                row["id"] = generate_uuid(
+                    text=row.get("identifier", "").lower()
+                )
 
                 row["publisher_id"] = (
                     None

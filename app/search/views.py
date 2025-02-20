@@ -46,7 +46,7 @@ def document(request: HttpRequest, id) -> HttpResponse:
     if not id:
         context["result"] = {}
         context["result"]["error"] = "id parameter is required"
-        context["result"]["status_code"] = http.HTTPStatus.BAD_REQUEST
+        context["status_code"] = http.HTTPStatus.BAD_REQUEST
         return render(request, template_name="document.html", context=context)
 
     # Create a search configuration object with the provided id
