@@ -126,7 +126,7 @@ function App() {
         ...(docTypeQuery.length > 0 && { document_type: docTypeQuery }),
         ...(publisherQuery.length > 0 && { publisher: publisherQuery }),
         sort: sortQuery.join(","),
-        page: pageQuery.join(","),
+        page: pageQuery.map(Number),
       }
 
       fetchDataWithLoading(filterParams)
