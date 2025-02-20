@@ -46,16 +46,18 @@ jest.mock("../../components/ResultsCount", () => ({
   ),
 }))
 jest.mock("../../components/Pagination", () => ({
-  Pagination: ({ pageData, pageQuery, setPageQuery }) => (
-    <div>
-      <button onClick={() => setPageQuery([pageQuery - 1])}>Previous</button>
-      <button onClick={() => setPageQuery([pageQuery + 1])}>Next</button>
-    </div>
-  ),
+  Pagination: ({ pageData, pageQuery, setPageQuery }) => {
+    return (
+      <div>
+        <button onClick={() => setPageQuery([parseInt(pageQuery) - 1])}>Previous</button>
+        <button onClick={() => setPageQuery([parseInt(pageQuery) + 1])}>Next</button>
+      </div>
+    )
+  },
 }))
 jest.mock("../../components/SortSelect", () => ({
   SortSelect: ({ sortQuery, setSortQuery }) => (
-    <select value={sortQuery} onChange={(e) => setSortQuery([e.target.value])}>
+    <select aria-label="Sort by" value={sortQuery} onChange={(e) => setSortQuery([e.target.value])}>
       <option value="recent">Recently updated</option>
       <option value="relevance">Relevance</option>
     </select>
@@ -65,12 +67,12 @@ jest.mock("../../components/SortSelect", () => ({
 describe("App", () => {
   beforeEach(() => {
     fetch.resetMocks()
+    fetchData.mockClear()
+    fetch.mockResponseOnce(JSON.stringify({ results: [] }))
+    fetchData.mockResolvedValueOnce({ results: [], start_index: 0, end_index: 0, results_total_count: 0 })
   })
 
   test("renders the App component", async () => {
-    fetch.mockResponseOnce(JSON.stringify({ results: [] }))
-    fetchData.mockResolvedValueOnce({ results: [], start_index: 0, end_index: 0, results_total_count: 0 })
-
     await waitFor(() => {
       render(<App />)
     })
@@ -78,88 +80,70 @@ describe("App", () => {
     expect(screen.getByLabelText("Search input")).toBeInTheDocument()
     expect(screen.getByText("Document type")).toBeInTheDocument()
     expect(screen.getByText("Published by")).toBeInTheDocument()
-    // expect(screen.getByText("Sort by")).toBeInTheDocument()
   })
 
-  //   test("handles search input and submit", async () => {
-  //     fetch.mockResponseOnce(JSON.stringify({ results: [] }))
-  //     fetchData.mockResolvedValueOnce({ results: [], start_index: 0, end_index: 0, results_total_count: 0 })
+  test("handles search input and submit", async () => {
+    await waitFor(() => {
+      render(<App />)
+    })
 
-  //     await waitFor(() => {
-  //       render(<App />)
-  //     })
+    fireEvent.change(screen.getByLabelText("Search input"), { target: { value: "test" } })
+    fireEvent.click(screen.getByText("Search"))
 
-  //     fireEvent.change(screen.getByLabelText("Search input"), { target: { value: "test" } })
-  //     fireEvent.click(screen.getByText("Search"))
+    await waitFor(() => {
+      expect(fetchData).toHaveBeenCalledWith({
+        search: "test",
+        sort: "recent",
+        page: [1],
+      })
+    })
+  })
 
-  //     await waitFor(() => {
-  //       expect(fetchData).toHaveBeenCalledWith({
-  //         search: "test",
-  //         document_type: [],
-  //         publisher: [],
-  //         sort: "recent",
-  //         page: [1],
-  //       })
-  //     })
-  //   })
+  test("handles filter changes", async () => {
+    await waitFor(() => {
+      render(<App />)
+    })
 
-  //   test("handles filter changes", async () => {
-  //     fetch.mockResponseOnce(JSON.stringify({ results: [] }))
-  //     fetchData.mockResolvedValueOnce({ results: [], start_index: 0, end_index: 0, results_total_count: 0 })
+    fireEvent.click(screen.getByLabelText("Legislation"))
+    await waitFor(() => {
+      expect(fetchData).toHaveBeenCalledWith({
+        search: "test",
+        document_type: ["legislation"],
+        sort: "recent",
+        page: [1],
+      })
+    })
+  })
 
-  //     await waitFor(() => {
-  //       render(<App />)
-  //     })
+  test("handles pagination", async () => {
+    await waitFor(() => {
+      render(<App />)
+    })
 
-  //     fireEvent.click(screen.getByLabelText("Document type 1"))
-  //     await waitFor(() => {
-  //       expect(fetchData).toHaveBeenCalledWith({
-  //         search: "",
-  //         document_type: ["Document type 1"],
-  //         publisher: [],
-  //         sort: "recent",
-  //         page: [1],
-  //       })
-  //     })
-  //   })
+    fireEvent.click(screen.getByText("Next"))
+    await waitFor(() => {
+      expect(fetchData).toHaveBeenCalledWith({
+        search: "test",
+        document_type: ["legislation"],
+        sort: "recent",
+        page: [2],
+      })
+    })
+  })
 
-  //   test("handles pagination", async () => {
-  //     fetch.mockResponseOnce(JSON.stringify({ results: [] }))
-  //     fetchData.mockResolvedValueOnce({ results: [], start_index: 0, end_index: 0, results_total_count: 0 })
+  test("handles sorting", async () => {
+    await waitFor(() => {
+      render(<App />)
+    })
 
-  //     await waitFor(() => {
-  //       render(<App />)
-  //     })
-
-  //     fireEvent.click(screen.getByText("Next"))
-  //     await waitFor(() => {
-  //       expect(fetchData).toHaveBeenCalledWith({
-  //         search: "",
-  //         document_type: [],
-  //         publisher: [],
-  //         sort: "recent",
-  //         page: [2],
-  //       })
-  //     })
-  //   })
-
-  //   test("handles sorting", async () => {
-  //     fetch.mockResponseOnce(JSON.stringify({ results: [] }))
-  //     fetchData.mockResolvedValueOnce({ results: [], start_index: 0, end_index: 0, results_total_count: 0 })
-
-  //     await waitFor(() => {
-  //       render(<App />)
-  //     })
-
-  //     fireEvent.change(screen.getByLabelText("Sort by"), { target: { value: "relevance" } })
-  //     await waitFor(() => {
-  //       expect(fetchData).toHaveBeenCalledWith({
-  //         search: "",
-  //         document_type: [],
-  //         publisher: [],
-  //         sort: "relevance",
-  //         page: [1],
-  //       })
-  //     })
-  //   })
+    fireEvent.change(screen.getByLabelText("Sort by"), { target: { value: "relevance" } })
+    await waitFor(() => {
+      expect(fetchData).toHaveBeenCalledWith({
+        search: "test",
+        document_type: ["legislation"],
+        sort: "relevance",
+        page: [2],
+      })
+    })
+  })
 })
