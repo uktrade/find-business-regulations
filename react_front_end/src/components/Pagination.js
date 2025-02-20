@@ -80,7 +80,7 @@ function Pagination({ pageData, pageQuery, setPageQuery }) {
                     setPageQuery([page_number])
                   }}
                   role="button"
-                  aria-label="Next page"
+                  aria-label={`Page ${page_number}`}
                 >
                   {page_number}
                 </a>
