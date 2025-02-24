@@ -1,4 +1,4 @@
-from django.db.models import Case, Q, Sum, Value, When
+from django.db.models import Case, F, Q, Sum, Value, When
 
 
 def calculate_score(queryset, search_query):
@@ -66,7 +66,9 @@ def calculate_score(queryset, search_query):
 
     # Order the queryset by the scores
     queryset = queryset.order_by(
-        "-title_score", "-regulatory_topics_score", "-description_score"
+        F("title_score").desc(nulls_last=True),
+        F("regulatory_topics_score").desc(nulls_last=True),
+        F("description_score").desc(nulls_last=True),
     )
 
     return queryset
