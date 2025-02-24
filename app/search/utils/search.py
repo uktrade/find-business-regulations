@@ -182,7 +182,7 @@ def search_database(config: SearchDocumentConfig):
 
     # Sort results based on the sort_by parameter
     if config.sort_by is None or config.sort_by == "recent":
-        return queryset.order_by("-sort_date")
+        return queryset.order_by(F("sort_date").desc(nulls_last=True))
 
     if config.sort_by == "relevance":
         try:
