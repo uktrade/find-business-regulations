@@ -1,12 +1,5 @@
 #!/bin/sh -e
 
-# Set NODE_ENV to production only in staging and prod environments
-if [ "$ENVIRONMENT" = "staging" ] || [ "$ENVIRONMENT" = "prod" ]; then
-  export NODE_ENV=production
-else
-  export NODE_ENV=development
-fi
-
 # Install Node.js dependencies
 echo "Installing node modules..."
 npm install
