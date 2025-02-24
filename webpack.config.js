@@ -3,7 +3,7 @@ const BundleTracker = require("webpack-bundle-tracker");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
-  mode: process.env.ENV == "production" ? "production" : "development",
+  mode: process.env.NODE_ENV === "production" ? "production" : "development",
   context: __dirname,
   entry: {
     // Non-react bundle

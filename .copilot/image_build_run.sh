@@ -9,13 +9,6 @@ export COPILOT_ENVIRONMENT_NAME='build'
 export DJANGO_SETTINGS_MODULE="fbr.settings"
 
 # Set NODE_ENV to production
-# export NODE_ENV=production
-
-# Set NODE_ENV to production only in staging and prod environments
-# if [ "$COPILOT_ENVIRONMENT_NAME" = "staging" ] || [ "$COPILOT_ENVIRONMENT_NAME" = "prod" ]; then
-#   export NODE_ENV=production
-# else
-#   export NODE_ENV=development
-# fi
+export NODE_ENV=production
 
 python manage.py collectstatic --noinput
