@@ -1,15 +1,5 @@
 #!/bin/sh -e
 
-# Set NODE_ENV to production
-export NODE_ENV=production
-
-# Set NODE_ENV to production only in staging and prod environments
-# if [ "$COPILOT_ENVIRONMENT_NAME" = "staging" ] || [ "$COPILOT_ENVIRONMENT_NAME" = "prod" ]; then
-#   export NODE_ENV=production
-# else
-#   export NODE_ENV=development
-# fi
-
 # Install Node.js dependencies
 echo "Installing node modules..."
 npm install

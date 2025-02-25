@@ -8,7 +8,4 @@ export BUILD_STEP='True'
 export COPILOT_ENVIRONMENT_NAME='build'
 export DJANGO_SETTINGS_MODULE="fbr.settings"
 
-# Set NODE_ENV to production
-export NODE_ENV=production
-
 python manage.py collectstatic --noinput
