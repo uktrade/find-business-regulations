@@ -58,7 +58,11 @@
               Last updated
             </dt>
             <dd class="govuk-summary-list__value">
-              {{ result.date_modified | date:"j F Y" }}
+              {% if result.date_modified %}
+                {{ result.date_modified | date:"j F Y" }}
+              {% else %}
+                {{ result.date_issued | date:"j F Y" }}
+              {% endif %}
             </dd>
           </div>
           <div class="govuk-summary-list__row">
