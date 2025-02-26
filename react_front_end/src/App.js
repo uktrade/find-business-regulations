@@ -114,6 +114,14 @@ function App() {
     fetchDataWithLoading(filterParams)
   }, [searchInput, docTypeQuery, publisherQuery, sortQuery, setPageQuery])
 
+  const handlePublisherClick = (publisherKey) => {
+    if (publisherQuery.includes(publisherKey)) return false
+
+    const updatedPublisherQuery = [...publisherQuery, publisherKey]
+    setPublisherQuery(updatedPublisherQuery)
+    setPublisherCheckedState(generateCheckedState(publishers, updatedPublisherQuery))
+  }
+
   useEffect(() => {
     if (isSearchSubmitted) {
       setIsSearchSubmitted(false)
@@ -243,7 +251,13 @@ function App() {
         {data.results_total_count === 0 && !isLoading ? (
           <NoResultsContent />
         ) : (
-          <Results results={data.results} isLoading={isLoading} searchQuery={searchQuery[0]} />
+          <Results
+            results={data.results}
+            isLoading={isLoading}
+            searchQuery={searchQuery[0]}
+            publishers={publishers}
+            onPublisherClick={handlePublisherClick}
+          />
         )}
 
         <Pagination pageData={data} pageQuery={pageQuery[0]} setPageQuery={setPageQuery} />
