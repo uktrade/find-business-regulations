@@ -1,7 +1,7 @@
 import { SkeletonResults } from "./SkeletonResults"
 import { formatDateToGovukStyle } from "../utils/date"
 
-function Results({ results, isLoading, searchQuery = "" }) {
+function Results({ results, isLoading, searchQuery = "", publishers, onPublisherClick }) {
   if (isLoading) {
     return <SkeletonResults />
   }
@@ -50,6 +50,7 @@ function Results({ results, isLoading, searchQuery = "" }) {
       {results.map((result) => {
         const { id, type, title, description, publisher, date_modified, date_valid, regulatory_topics } = result
 
+        const publisherName = publishers.find((publisherName) => publisherName.label === publisher).name
         // const highlightedTitle = title ? <span dangerouslySetInnerHTML={highlight(title)} /> : ""
         const highlightedDescription = description ? truncateAndHighlightDescription(description) : ""
 
@@ -66,7 +67,17 @@ function Results({ results, isLoading, searchQuery = "" }) {
               </a>
             </h2>
             <p className="govuk-body">{highlightedDescription}</p>
-            <p className="govuk-body-s fbr-secondary-text-colour govuk-!-margin-bottom-2">Published by: {publisher}</p>
+            <p className="govuk-body-s fbr-secondary-text-colour govuk-!-margin-bottom-2">
+              Published by:{" "}
+              <button
+                onClick={() => onPublisherClick(publisherName)}
+                className="fbr-clickable-tag"
+                role="button"
+                tabIndex="0"
+              >
+                {publisher}
+              </button>
+            </p>
             <p className="govuk-body-s fbr-secondary-text-colour">Last updated: {govukDate}</p>
             {regulatory_topics && regulatory_topics.length > 0 ? (
               <ul className="govuk-list fbr-topics-list">{renderRegulatoryTopics(regulatory_topics, searchQuery)}</ul>
