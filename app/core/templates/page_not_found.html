@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block head_title %}Page not found - {{service_name}}{% endblock %}
+{% block service_name %}{{service_name}}{% endblock %}
+
+{% block body_content %}
+  <div class="govuk-width-container">
+    <main class="govuk-main-wrapper govuk-main-wrapper--l" id="main-content">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <h1 class="govuk-heading-xl">Page not found</h1>
+          <p class="govuk-body">If you entered a web address, check it is correct.</p>
+          <p class="govuk-body">
+            You can  <a class="govuk-link govuk-link--no-visited-state" href="/">go back to the main page to start a new search</a> for business regulations.
+          </p>
+          <p class="govuk-body">
+            <a class="govuk-link govuk-link--no-visited-state" href="/feedback">Let us know</a> if you followed a link to this page.
+          </p>
+        </div>
+      </div>
+    </main>
+  </div>
+{% endblock %}

@@ -196,3 +196,13 @@ def hide_cookie_banner(request) -> HttpResponseRedirect:
     ):
         current_page = "/"
     return redirect(current_page)
+
+
+@require_http_methods(["GET"])
+def page_not_found(request, exception):
+    """Custom 404 error page."""
+    context = {
+        "service_name": settings.SERVICE_NAME,
+        "service_name_long": settings.SERVICE_NAME_LONG,
+    }
+    return render(request, "page_not_found.html", context, status=404)
