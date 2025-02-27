@@ -280,6 +280,8 @@ class Legislation:
             "date_issued": convert_date_string_to_obj(valid_sort_date),
             "date_modified": convert_date_string_to_obj(modified),
             "date_valid": valid_sort_date,
+            "source_date_modified": modified,
+            "source_date_valid": valid,
             "sort_date": valid_sort_date,
             "type": "Legislation",
         }
