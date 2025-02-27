@@ -138,6 +138,13 @@ class PublicGateway:
                     f"{inserted_document_count} / ({total_documents})..."
                 )
 
+                # Unnormalized date fields
+                row["source_date_issued"] = row.get("date_issued")
+
+                row["source_date_modified"] = row.get("date_modified")
+
+                row["source_date_valid"] = row.get("date_valid")
+
                 # Normalize the date fields
                 row["date_issued"] = convert_date_string_to_obj(
                     row.get("date_issued")
