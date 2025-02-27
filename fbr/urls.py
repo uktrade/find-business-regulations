@@ -110,5 +110,8 @@ urlpatterns = [
     path("healthcheck/", core_views.health_check, name="healthcheck"),
 ]
 
+# Define the custom 404 handler
+handler404 = "app.core.views.page_not_found"
+
 if settings.DJANGO_ADMIN:
     urlpatterns.append(path("admin/", admin.site.urls))

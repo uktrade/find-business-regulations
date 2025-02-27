@@ -44,10 +44,10 @@ def document(request: HttpRequest, id) -> HttpResponse:
     }
 
     if not id:
-        context["result"] = {}
-        context["result"]["error"] = "id parameter is required"
         context["status_code"] = http.HTTPStatus.BAD_REQUEST
-        return render(request, template_name="document.html", context=context)
+        return render(
+            request, template_name="page_not_found.html", context=context
+        )
 
     # Create a search configuration object with the provided id
     config = SearchDocumentConfig(search_query="", id=id)
@@ -58,12 +58,9 @@ def document(request: HttpRequest, id) -> HttpResponse:
         queryset = search_database(config)
 
         if not queryset:
-            context["result"] = {}
-            context["result"]["title"] = "document does not exist"
-            context["result"]["error"] = "document not found"
             context["status_code"] = http.HTTPStatus.NOT_FOUND
             return render(
-                request, template_name="document.html", context=context
+                request, template_name="page_not_found.html", context=context
             )
 
         context["result"] = queryset.first()
