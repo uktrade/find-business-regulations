@@ -48,15 +48,17 @@ function Results({ results, isLoading, searchQuery = "", publishers, onPublisher
   return results ? (
     <div className="govuk-summary-list fbr-search-results">
       {results.map((result) => {
-        const { id, type, title, description, publisher, date_modified, date_valid, regulatory_topics } = result
+        const { id, type, title, description, publisher, source_date_modified, source_date_issued, regulatory_topics } =
+          result
 
         const publisherName = publishers.find((publisherName) => publisherName.label === publisher).name
         // const highlightedTitle = title ? <span dangerouslySetInnerHTML={highlight(title)} /> : ""
         const highlightedDescription = description ? truncateAndHighlightDescription(description) : ""
 
-        // Format the date to the GOV.UK style
-        // We're now using the date_valid field instead of date_modified
-        const govukDate = date_valid ? formatDateToGovukStyle(date_valid) : "Unknown"
+        // console.log("source_date_modified: ", source_date_modified)
+        // console.log("source_date_issued: ", source_date_issued)
+        // console.log("source_date_valid: ", source_date_valid)
+        // console.log("-------------------")
 
         return (
           <div className="govuk-summary-list__row--no-border" key={id}>
@@ -78,7 +80,9 @@ function Results({ results, isLoading, searchQuery = "", publishers, onPublisher
                 {publisher}
               </button>
             </p>
-            <p className="govuk-body-s fbr-secondary-text-colour">Last updated: {govukDate}</p>
+            <p className="govuk-body-s fbr-secondary-text-colour">
+              Last updated: {source_date_modified ? source_date_modified : source_date_issued}
+            </p>
             {regulatory_topics && regulatory_topics.length > 0 ? (
               <ul className="govuk-list fbr-topics-list">{renderRegulatoryTopics(regulatory_topics, searchQuery)}</ul>
             ) : null}
