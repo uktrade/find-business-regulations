@@ -55,11 +55,6 @@ function Results({ results, isLoading, searchQuery = "", publishers, onPublisher
         // const highlightedTitle = title ? <span dangerouslySetInnerHTML={highlight(title)} /> : ""
         const highlightedDescription = description ? truncateAndHighlightDescription(description) : ""
 
-        // console.log("source_date_modified: ", source_date_modified)
-        // console.log("source_date_issued: ", source_date_issued)
-        // console.log("source_date_valid: ", source_date_valid)
-        // console.log("-------------------")
-
         return (
           <div className="govuk-summary-list__row--no-border" key={id}>
             <span className="govuk-caption-m">{type}</span>
