@@ -16,8 +16,8 @@ describe("Results", () => {
       title: "Test Document 1",
       description: "This is a test document description.",
       publisher: "Test Publisher",
-      date_modified: "2023-01-01",
-      date_valid: "2023-01-01",
+      source_date_modified: "1 January 2023",
+      source_date_issued: "1 January 2023",
       regulatory_topics: ["Topic 1", "Topic 2"],
     },
     {
@@ -26,8 +26,8 @@ describe("Results", () => {
       title: "Test Document 2",
       description: "Another test document description.",
       publisher: "Another Publisher",
-      date_modified: "2023-02-01",
-      date_valid: "2023-02-01",
+      source_date_modified: "February 2023",
+      source_date_issued: "2023",
       regulatory_topics: ["Topic 3"],
     },
   ]
@@ -92,7 +92,7 @@ describe("Results", () => {
       />,
     )
     expect(screen.getByText("Last updated: 1 January 2023")).toBeInTheDocument()
-    expect(screen.getByText("Last updated: 1 February 2023")).toBeInTheDocument()
+    expect(screen.getByText("Last updated: February 2023")).toBeInTheDocument()
   })
 
   test("calls onPublisherClick with the correct publisher key", () => {

@@ -44,3 +44,25 @@ def convert_date_string_to_obj(
             logger.error(f"error converting date string: {e}")
             return None
     return None
+
+
+def format_partial_date_govuk(date_str):
+    if not date_str:
+        return ""
+
+    try:
+        if len(date_str) == 4:
+            # Year only
+            return date_str
+        elif len(date_str) == 7:
+            # Year and month
+            date_obj = datetime.strptime(date_str, "%Y-%m")
+            return date_obj.strftime("%B %Y")
+        elif len(date_str) == 10:
+            # Year, month, and day
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+            return date_obj.strftime("%-d %B %Y")
+        else:
+            return date_str
+    except ValueError:
+        return date_str

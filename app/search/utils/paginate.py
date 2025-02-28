@@ -5,6 +5,7 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import QuerySet
 
 from app.search.config import SearchDocumentConfig
+from app.search.utils.date import format_partial_date_govuk
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +44,8 @@ def paginate(
     - "publisher"
     - "description"
     - "type"
-    - "date_modified"
-    - "date_valid"
+    - "source_date_modified"
+    - "source_date_issued"
     - "regulatory_topics"
 
     Updates the context with:
@@ -104,8 +105,12 @@ def paginate(
                 "publisher": paginated_document.publisher,
                 "description": paginated_document.description,
                 "type": paginated_document.type,
-                "date_modified": paginated_document.date_modified,
-                "date_valid": paginated_document.date_valid,
+                "source_date_modified": format_partial_date_govuk(
+                    paginated_document.source_date_modified
+                ),
+                "source_date_issued": format_partial_date_govuk(
+                    paginated_document.source_date_issued
+                ),
                 "regulatory_topics": paginated_document.regulatory_topics,
             }
         )

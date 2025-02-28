@@ -3,8 +3,6 @@ import { SEARCH_URL, PUBLISHERS } from "./constants"
 function buildQuery(filters) {
   const { search, document_type, publisher, sort, page } = filters
 
-  // console.log("Search/filter data from React: ", filters)
-
   const searchQuery = search && search.length > 2 ? `query=${search}` : ""
   const documentTypeQuery = document_type ? document_type.map((type) => `document_type=${type}`).join("&") : ""
   const publisherQuery = publisher ? publisher.map((pub) => `publisher=${pub}`).join("&") : ""
@@ -22,8 +20,6 @@ export async function fetchData(filters) {
   const query = buildQuery(filters)
 
   const url = `${SEARCH_URL}?${query}`
-
-  // console.log("Fetching data: ", url)
 
   try {
     const response = await fetch(url)

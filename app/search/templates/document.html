@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load custom_date_tags %}
 
 {% block head_title %}{{ result.title }} - {{service_name}}{% endblock %}
 {% block service_name %}{{service_name}}{% endblock %}
@@ -50,7 +51,11 @@
               Date published
             </dt>
             <dd class="govuk-summary-list__value">
-              {{ result.date_issued | date:"j F Y" }}
+              {% if result.source_date_issued %}
+                {{ result.source_date_issued | format_partial_date }}
+              {% else %}
+                {{ result.source_date_valid | format_partial_date }}
+              {% endif %}
             </dd>
           </div>
           <div class="govuk-summary-list__row">
@@ -58,10 +63,10 @@
               Last updated
             </dt>
             <dd class="govuk-summary-list__value">
-              {% if result.date_modified %}
-                {{ result.date_modified | date:"j F Y" }}
+              {% if result.source_date_modified %}
+                {{ result.source_date_modified | format_partial_date }}
               {% else %}
-                {{ result.date_issued | date:"j F Y" }}
+                {{ result.source_date_issued | format_partial_date }}
               {% endif %}
             </dd>
           </div>
