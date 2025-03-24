@@ -172,6 +172,7 @@ function App() {
               <h2 className="govuk-fieldset__heading">Document type</h2>
             </legend>
             <CheckboxFilter
+              checkboxGroupName="document_type"
               checkboxData={DOCUMENT_TYPES}
               checkedState={documentTypeCheckedState}
               setCheckedState={setDocumentTypeCheckedState}
@@ -188,6 +189,7 @@ function App() {
             </legend>
             {publishers ? (
               <CheckboxFilter
+                checkboxGroupName="publishers"
                 checkboxData={publishers}
                 checkedState={publisherCheckedState}
                 setCheckedState={setPublisherCheckedState}
@@ -248,6 +250,7 @@ function App() {
         )}
         <SortSelect sortQuery={sortQuery[0]} setSortQuery={setSortQuery} />
         <hr className="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
+        <h2 className="govuk-heading-l govuk-visually-hidden">Search results</h2>
         {data.results_total_count === 0 && !isLoading ? (
           <NoResultsContent />
         ) : (
