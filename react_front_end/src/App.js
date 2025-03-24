@@ -226,6 +226,7 @@ function App() {
             start={data.start_index}
             end={data.end_index}
             totalResults={data.results_total_count}
+            searchQuery={searchQuery[0]}
           />
           <p className="govuk-body govuk-!-margin-bottom-0">
             <a
