@@ -51,8 +51,9 @@ function Results({ results, isLoading, searchQuery = "", publishers, onPublisher
         const { id, type, title, description, publisher, source_date_modified, source_date_issued, regulatory_topics } =
           result
 
-        const publisherName = publishers.find((publisherName) => publisherName.label === publisher).name
-        // const highlightedTitle = title ? <span dangerouslySetInnerHTML={highlight(title)} /> : ""
+        const publisherObj = publishers.find((pub) => pub.label === publisher)
+        const publisherName = publisherObj ? publisherObj.name : "Unknown publisher"
+
         const highlightedDescription = description ? truncateAndHighlightDescription(description) : ""
 
         return (
