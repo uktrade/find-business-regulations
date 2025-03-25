@@ -166,8 +166,12 @@ def download_csv(request):
                     "publisher": result.publisher,
                     "description": result.description,
                     "type": result.type,
-                    "date_valid": result.date_valid,
+                    "date_published": result.source_date_issued
+                    or result.source_date_valid,
+                    "last_updated": result.source_date_modified
+                    or result.source_date_issued,
                     "document_url": f"{base_url}/document/{result.id}",
+                    "external_url": result.identifier,
                 }
             )
 
@@ -182,7 +186,9 @@ def download_csv(request):
         return response
     except Exception as e:
         logger.error("error downloading CSV: %s", e)
-        return HttpResponse(
-            content="error downloading CSVs",
-            status=500,
+        return render(
+            request,
+            "page_not_found.html",
+            {"service_name": settings.SERVICE_NAME},
+            status=404,
         )

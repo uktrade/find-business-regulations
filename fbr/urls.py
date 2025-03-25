@@ -107,6 +107,7 @@ urlpatterns = [
         core_views.hide_cookie_banner,
         name="hide-cookie-banner",
     ),
+    path("page-not-found/", core_views.page_not_found, name="page_not_found"),
     path("healthcheck/", core_views.health_check, name="healthcheck"),
 ]
 
