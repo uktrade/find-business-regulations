@@ -21,8 +21,66 @@ from app.search.utils.paginate import paginate
 logger = logging.getLogger(__name__)
 
 
+def clean_up_tokens(search_string, all_phrases):
+    """
+    Parse search string into tokens, optionally wrapping all non-operator multi-word phrases in quotes.
+
+    Args:
+        search_string: The search query string to parse
+        all_phrases: If True, all space-separated text (except operators) will be treated as phrases
+                     and wrapped in quotes if not already quoted
+
+    Returns:
+        A cleaned search string with phrases properly quoted when all_phrases=True
+    """
+    if not search_string:
+        return ""
+
+    # First extract quoted phrases, operators, and individual words
+    tokens = re.findall(r'"[^"]+"|\bAND\b|\bOR\b|\w+', search_string)
+
+    if all_phrases:
+        # Group non-operator, non-quoted consecutive words into phrases
+        operators = {"AND", "OR"}
+        quoted_tokens = []
+        current_phrase = []
+
+        for token in tokens:
+            # Skip empty tokens
+            if not token:
+                continue
+
+            # Check if token is already quoted
+            is_quoted = token.startswith('"') and token.endswith('"')
+            # Check if token is an operator
+            is_operator = token in operators
+
+            if is_quoted or is_operator:
+                # If we have a phrase being built, finalize it first
+                if current_phrase:
+                    quoted_tokens.append(f'"{" ".join(current_phrase)}"')
+                    current_phrase = []
+
+                # Add the quoted phrase or operator as is
+                quoted_tokens.append(token)
+            else:
+                # Add word to current phrase
+                current_phrase.append(token)
+
+        # Don't forget any remaining phrase
+        if current_phrase:
+            quoted_tokens.append(f'"{" ".join(current_phrase)}"')
+
+        # Join the tokens back together with spaces
+        return quoted_tokens
+
+    return tokens
+
+
 def create_search_query(
-    search_string: str, ext_search_results: bool = False
+    search_string: str,
+    ext_search_results: bool = False,
+    xor_as_phrases: bool = False,
 ) -> Union[SearchQuery, Tuple[SearchQuery, int, int, int]]:
     """
     Create a search query from a search string with
@@ -34,7 +92,11 @@ def create_search_query(
     :return: A combined SearchQuery object or a tuple with the query and counts
     """
     # Split the string into tokens, handling quoted phrases and operators
-    tokens = re.findall(r'"[^"]+"|\bAND\b|\bOR\b|\w+', search_string)
+
+    tokens = clean_up_tokens(search_string, False)
+
+    if xor_as_phrases:
+        tokens = tokens + clean_up_tokens(search_string, xor_as_phrases)
 
     # Validate tokens to avoid issues with syntax
     if not tokens:
@@ -60,6 +122,7 @@ def create_search_query(
         else:
             # Handle phrases and plain text
             is_phrase = token.startswith('"') and token.endswith('"')
+
             if is_phrase:
                 num_phrases += 1
 
@@ -117,7 +180,7 @@ def search_database(config: SearchDocumentConfig):
     # Generate query object
     try:
         query_objs, num_ands, num_ors, num_phrases = create_search_query(
-            query_str, True
+            query_str, True, True
         )
         logger.debug(f"search query objects: {query_objs}")
     except Exception as e:
@@ -187,8 +250,7 @@ def search_database(config: SearchDocumentConfig):
     if config.sort_by == "relevance":
         try:
             # Calculate the score for each document based on the search query
-            query_str = re.sub(r"[^a-zA-Z0-9\s]", "", query_str)
-            queryset = calculate_score(queryset, query_str)
+            queryset = calculate_score(query_objs, queryset)
         except Exception as e:
             logger.error(f"error calculating score for search: {e}")
 

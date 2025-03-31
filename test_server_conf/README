@@ -1,0 +1,53 @@
+# Local Django Development Setup
+
+## Prerequisites
+- Docker and Docker Compose installed on your machine
+- PyCharm IDE
+- OpenSSL installed on your system
+
+## Setup Instructions
+
+### Step 1: Start Docker Containers
+1. Start all necessary Docker containers:
+```
+docker-compose up
+```
+2. Once all containers are running properly, turn off the web-1 container:
+```
+docker-compose stop web-1
+```
+
+### Step 2: Generate SSL Certificates
+1. Navigate to your `test_server_conf` directory in terminal:
+```
+cd path/to/test_server_conf
+```
+2. Generate self-signed SSL certificates:
+```
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
+```
+   When prompted, provide the necessary certificate information or use defaults by pressing Enter.
+
+### Step 3: Run Django Development Server
+1. Open your project in PyCharm IDE
+2. Select the "Local | Server" run configuration
+3. Click the Run button to start the Django development server
+
+### Step 4: Access the Application
+1. Open your web browser and navigate to:
+```
+https://localhost:8000/
+```
+2. You may need to accept the security warning about the self-signed certificate
+
+## Troubleshooting
+
+- If you encounter database connection issues, ensure your database container is running and properly configured in your Django settings
+- Your browser may show a security warning about the self-signed certificate; this is normal for development environments
+- Make sure the ports specified in your PyCharm configuration don't conflict with other services
+
+## Additional Notes
+
+- The local development server will use the SSL certificates you generated for HTTPS support
+- Any changes made to your code will be automatically detected and the server will reload accordingly
+- The database remains in Docker while the Django application runs locally for faster development

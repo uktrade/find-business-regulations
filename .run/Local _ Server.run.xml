@@ -1,0 +1,41 @@
+<!-- pragma: allowlist secret -->
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Local | Server" type="Python.DjangoServer" factoryName="Django server">
+    <module name="find-business-regulations" />
+    <option name="ENV_FILES" value="$PROJECT_DIR$/test_server_conf/local_test_conf.env" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="PARENT_ENVS" value="true" />
+    <envs>
+      <env name="DATABASE_URL"
+           value="postgres://postgres:postgres@localhost:5432/fbr" /> <!-- pragma: allowlist secret -->
+      <env name="DJANGO_SETTINGS_MODULE" value="fbr.settings" />
+      <env name="PYTHONUNBUFFERED" value="1" />
+      <env name="DJANGO_LOCAL_IDE_TEST_SERVER" value="true" />
+    </envs>
+    <option name="SDK_HOME" value="" />
+    <option name="SDK_NAME" value="Python 3.12 (pythonProject)" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="IS_MODULE_SDK" value="false" />
+    <option name="ADD_CONTENT_ROOTS" value="true" />
+    <option name="ADD_SOURCE_ROOTS" value="true" />
+    <EXTENSION ID="com.fapiko.jetbrains.plugins.better_direnv.runconfigs.PycharmRunConfigurationExtension">
+      <option name="DIRENV_ENABLED" value="false" />
+      <option name="DIRENV_TRUSTED" value="false" />
+    </EXTENSION>
+    <EXTENSION ID="software.aws.toolkits.jetbrains.core.execution.PythonAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </EXTENSION>
+    <option name="launchJavascriptDebuger" value="false" />
+    <option name="port" value="8000" />
+    <option name="host" value="localhost" />
+    <option name="additionalOptions" value="" />
+    <option name="browserUrl" value="" />
+    <option name="runTestServer" value="false" />
+    <option name="runNoReload" value="false" />
+    <option name="useCustomRunCommand" value="false" />
+    <option name="customRunCommand" value="" />
+    <method v="2" />
+  </configuration>
+</component>
