@@ -1,74 +1,87 @@
-from django.db.models import Case, F, Q, Sum, Value, When
+from django.contrib.postgres.search import SearchRank, SearchVector
+from django.db.models import Case, F, FloatField, IntegerField, Value, When
 
 
-def calculate_score(queryset, search_query):
+def calculate_score(query_objs, queryset):
     """
-    Calculate relevance scores for a queryset based on a search query
-     and order items.
+    Calculate relevance scores for a queryset based on search queries
+    and order items with title matches at the top.
 
-    This function processes a given queryset and a search query string by
+    This function processes a given queryset and SearchQuery objects by
     calculating a relevance score for each entry in the queryset.
-    The scoring is performed based on the occurrence of individual terms
-    from the search query in three fields of the queryset:
-    'title', 'regulatory_topics', and 'description'.
-
-    It leverages Django's ORM capabilities, annotates the queryset with
-    the calculated scores, and orders the entries in descending order based
-    on these scores.
+    The scoring prioritizes matches in the title field to ensure they
+    appear at the top of the results, followed by matches in regulatory_topics
+    and description fields.
 
     Arguments:
+        query_objs (list): A list of SearchQuery objects representing the
+        search terms.
         queryset (QuerySet): A Django QuerySet that represents the data
             entries to which the scoring system will be applied.
-        search_query (str): A string representing the search term(s) used
-            to calculate relevance scores. The search query string is
-            split into individual terms for processing.
 
     Returns:
         QuerySet: The original queryset annotated with scoring fields and
-            ordered in descending order of relevance determined by the scores.
+            ordered to prioritize title matches first, followed by
+            overall relevance.
     """
-    search_terms = search_query.split()
+    # Create search vectors with different weights
+    title_vector = SearchVector("title", weight="A")  # Highest weight
+    regulatory_topics_vector = SearchVector("regulatory_topics", weight="C")
+    description_vector = SearchVector(
+        "description", weight="B"
+    )  # Higher than topics but lower than title
 
-    # Create cases for each field
-    title_cases = Case(
-        *[
-            When(Q(title__icontains=term), then=Value(1))
-            for term in search_terms
-        ],
-        default=Value(0)
-    )
-    regulatory_topics_cases = Case(
-        *[
-            When(Q(regulatory_topics__icontains=term), then=Value(1))
-            for term in search_terms
-        ],
-        default=Value(0)
-    )
-    description_cases = Case(
-        *[
-            When(Q(description__icontains=term), then=Value(1))
-            for term in search_terms
-        ],
-        default=Value(0)
+    # Combine vectors
+    search_vector = (
+        title_vector + regulatory_topics_vector + description_vector
     )
 
-    # Sum the cases for each field
-    title_score = Sum(title_cases)
-    regulatory_topics_score = Sum(regulatory_topics_cases)
-    description_score = Sum(description_cases)
+    # Combine all query objects if there are multiple
+    if isinstance(query_objs, list) and len(query_objs) > 1:
+        combined_query = query_objs[0]
+        for query in query_objs[1:]:
+            combined_query = combined_query | query
+    else:
+        combined_query = (
+            query_objs[0] if isinstance(query_objs, list) else query_objs
+        )
 
-    # Annotate the queryset with the scores
+    # Annotate the queryset with scores
     queryset = queryset.annotate(
-        title_score=title_score,
-        regulatory_topics_score=regulatory_topics_score,
-        description_score=description_score,
+        # Calculate SearchRank for different fields
+        title_rank=SearchRank(title_vector, combined_query),
+        description_rank=SearchRank(description_vector, combined_query),
+        regulatory_topics_rank=SearchRank(
+            regulatory_topics_vector, combined_query
+        ),
+        # Overall rank
+        overall_rank=SearchRank(search_vector, combined_query),
+        # Binary flag for ANY title match (this ensures title matches
+        # come first)
+        has_title_match=Case(
+            When(title_rank__gt=0, then=Value(1)),
+            default=Value(0),
+            output_field=IntegerField(),
+        ),
+        # Final combined score that prioritizes title matches first
+        final_score=Case(
+            # First priority tier: Has title match
+            When(
+                has_title_match=1,
+                # Within this tier, order by title rank first, then
+                # by overall rank
+                then=F("title_rank") * Value(1000)
+                + F("overall_rank") * Value(100)
+                + F("description_rank") * Value(10)
+                + F("regulatory_topics_rank"),
+            ),
+            # Second priority tier: No title match
+            default=F("overall_rank") * Value(100)
+            + F("description_rank") * Value(10)
+            + F("regulatory_topics_rank"),
+            output_field=FloatField(),
+        ),
     )
 
-    # Order the queryset by the scores
-    queryset = queryset.order_by(
-        F("title_score").desc(nulls_last=True),
-        F("regulatory_topics_score").desc(nulls_last=True),
-        F("description_score").desc(nulls_last=True),
-    )
-
-    return queryset
+    # Order by final score, ensuring title matches come first
+    return queryset.order_by("-has_title_match", "-final_score")
