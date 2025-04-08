@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react"
+import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { useQueryParams } from "./hooks/useQueryParams"
 import { fetchData } from "./utils/fetch-drf"
 import { DOCUMENT_TYPES, PUBLISHERS_URL } from "./utils/constants"
@@ -12,25 +12,42 @@ import { ResultsCount } from "./components/ResultsCount"
 import { SortSelect } from "./components/SortSelect"
 import { NoResultsContent } from "./components/NoResultsContent"
 
+/**
+ * Generates an array of boolean values based on which checkboxes match the query values
+ *
+ * @param {Array} checkboxes - Array of checkbox objects with name properties
+ * @param {Array} queryValues - Array of selected values from the URL query
+ * @returns {Array} - Array of boolean values indicating checked state
+ */
 const generateCheckedState = (checkboxes, queryValues) => {
   return checkboxes.map(({ name }) => queryValues.includes(name))
 }
 
+/**
+ * Main application component that handles search functionality, filters, and results display
+ */
 function App() {
+  // URL query parameters with their default values
   const [searchQuery, setSearchQuery] = useQueryParams("search", [])
   const [docTypeQuery, setDocTypeQuery] = useQueryParams("document_type", [])
   const [publisherQuery, setPublisherQuery] = useQueryParams("publisher", [])
   const [sortQuery, setSortQuery] = useQueryParams("sort", ["recent"])
   const [pageQuery, setPageQuery] = useQueryParams("page", [1])
 
-  const [searchInput, setSearchInput] = useState(searchQuery[0] || "") // Set initial state to query parameter value
-  const [data, setData] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSearchSubmitted, setIsSearchSubmitted] = useState(false)
-  const [publishers, setPublishers] = useState([]) // Add publishers state
-  const [publisherCheckedState, setPublisherCheckedState] = useState([])
-  const [pageTitle, setPageTitle] = useState("Find business regulations")
+  // Local state
+  const [searchInput, setSearchInput] = useState(searchQuery[0] || "") // Current search input text
+  const [data, setData] = useState([]) // API response data
+  const [isLoading, setIsLoading] = useState(true) // Loading state for API calls
+  const [isSearchSubmitted, setIsSearchSubmitted] = useState(false) // Flag to track search form submission
+  const [publishers, setPublishers] = useState([]) // List of publishers fetched from API
+  const [publisherCheckedState, setPublisherCheckedState] = useState([]) // Checked state for publisher filters
+  const [pageTitle, setPageTitle] = useState("Find business regulations") // Browser tab title
 
+  // Track whether this is the first search after page load
+  // Used to automatically switch sort to "relevance" on first search
+  const isFirstRender = useRef(true)
+
+  // Fetch the list of publishers on component mount
   useEffect(() => {
     const fetchPublishers = async () => {
       try {
@@ -49,14 +66,16 @@ function App() {
     fetchPublishers()
   }, [])
 
-  // Memoize the initial checked state for document types and publishers
+  // Initialize document type filter checked states
+  // Memoized to avoid recalculation on every render
   const initialDocumentTypeCheckedState = useMemo(
     () => generateCheckedState(DOCUMENT_TYPES, docTypeQuery),
     [docTypeQuery],
   )
   const [documentTypeCheckedState, setDocumentTypeCheckedState] = useState(initialDocumentTypeCheckedState)
 
-  // Memoize the handleSearchChange function
+  // Handle changes to the search input
+  // Memoized to avoid recreation on every render
   const handleSearchChange = useCallback(
     (event) => {
       setSearchInput(event.target.value)
@@ -64,6 +83,12 @@ function App() {
     [setSearchInput],
   )
 
+  /**
+   * Handle removing a filter from the applied filters
+   *
+   * @param {string} filterName - Type of filter ("docType" or "publisher")
+   * @param {string} filter - Value of the filter to remove
+   */
   const handleDeleteFilter = (filterName, filter) => {
     const updateQueryAndState = (query, setQuery, setCheckedState, data) => {
       const updatedQuery = query.filter((item) => item !== filter)
@@ -78,6 +103,11 @@ function App() {
     }
   }
 
+  /**
+   * Handle clearing all applied filters
+   *
+   * @param {Event} event - Click event
+   */
   const handleClearFilters = (event) => {
     event.preventDefault()
     setDocTypeQuery([])
@@ -86,6 +116,11 @@ function App() {
     setPublisherCheckedState(generateCheckedState(publishers, []))
   }
 
+  /**
+   * Fetch data with loading state management
+   *
+   * @param {Object} queryString - Object with query parameters
+   */
   const fetchDataWithLoading = async (queryString) => {
     setIsLoading(true)
     try {
@@ -98,23 +133,45 @@ function App() {
     }
   }
 
+  /**
+   * Handle search form submission
+   * Updates URL query params and fetches results
+   */
   const handleSearchSubmit = useCallback(() => {
     setIsSearchSubmitted(true)
     setSearchQuery([searchInput])
-    setPageQuery([1]) // Set the page to 1 when a new search is made
+    setPageQuery([1]) // Reset to first page on new search
 
+    // Switch sort to "relevance" if a search term is entered and this is the first search
+    // This ensures that the first search prioritizes relevance while preserving user sort choice afterwards
+    if (searchInput.length > 0 && isFirstRender.current) {
+      setSortQuery(["relevance"])
+    }
+
+    // Mark that the first render has occurred
+    isFirstRender.current = false
+
+    // Build filter parameters for the API request
     const filterParams = {
       ...(searchInput.length > 0 && { search: searchInput }),
       ...(docTypeQuery.length > 0 && { document_type: docTypeQuery }),
       ...(publisherQuery.length > 0 && { publisher: publisherQuery }),
       sort: sortQuery.join(","),
-      page: [1], // Set page to 1 for new search
+      page: [1],
     }
 
     fetchDataWithLoading(filterParams)
   }, [searchInput, docTypeQuery, publisherQuery, sortQuery, setPageQuery])
 
+  /**
+   * Handle clicking on a publisher in the search results
+   * Adds the publisher to the filter if not already included
+   *
+   * @param {string} publisherKey - The publisher identifier to add
+   * @returns {boolean} - False if publisher already in filters
+   */
   const handlePublisherClick = (publisherKey) => {
+    // Prevent adding duplicate publishers to the filter
     if (publisherQuery.includes(publisherKey)) return false
 
     const updatedPublisherQuery = [...publisherQuery, publisherKey]
@@ -122,7 +179,10 @@ function App() {
     setPublisherCheckedState(generateCheckedState(publishers, updatedPublisherQuery))
   }
 
+  // Fetch data when URL parameters change (e.g., from back/forward navigation)
+  // Uses debounce to avoid excessive API calls
   useEffect(() => {
+    // Skip if the change was from a form submission (handleSearchSubmit already fetches data)
     if (isSearchSubmitted) {
       setIsSearchSubmitted(false)
       return
@@ -138,13 +198,15 @@ function App() {
       }
 
       fetchDataWithLoading(filterParams)
-    }, 300) // Adjust the delay as needed
+    }, 300) // Debounce delay
 
+    // Clean up timeout on component unmount or dependency change
     return () => {
       clearTimeout(handler)
     }
   }, [searchQuery, docTypeQuery, publisherQuery, sortQuery, pageQuery])
 
+  // Update page title based on search query and page number
   useEffect(() => {
     if (searchQuery.length > 0) {
       const newTitle = `${searchQuery.join(", ")} - page ${pageQuery[0]} - Find business regulations`
@@ -154,18 +216,21 @@ function App() {
     }
   }, [searchQuery, pageQuery])
 
+  // Update the document title when pageTitle changes
   useEffect(() => {
     document.title = pageTitle
   }, [pageTitle])
 
   return (
     <div className="govuk-grid-row search-form">
+      {/* Left sidebar with search and filters */}
       <div className="govuk-grid-column-one-third">
         <Search
           handleSearchChange={handleSearchChange}
           searchInput={searchInput}
           handleSearchSubmit={handleSearchSubmit}
         />
+        {/* Document type filter */}
         <div className="govuk-form-group ">
           <fieldset className="govuk-fieldset">
             <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">
@@ -182,6 +247,7 @@ function App() {
             />
           </fieldset>
         </div>
+        {/* Publisher filter */}
         <div className="govuk-form-group">
           <fieldset className="govuk-fieldset">
             <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">
@@ -203,6 +269,7 @@ function App() {
           </fieldset>
         </div>
         <hr className="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
+        {/* CSV download link */}
         <p className="govuk-body">
           <a
             id="download-csv-link"
@@ -219,7 +286,10 @@ function App() {
           </a>
         </p>
       </div>
+
+      {/* Main content area with search results */}
       <div className="govuk-grid-column-two-thirds">
+        {/* Results count and clear filters section */}
         <div className="fbr-flex fbr-flex--space-between">
           <ResultsCount
             isLoading={isLoading}
@@ -229,16 +299,13 @@ function App() {
             searchQuery={searchQuery[0]}
           />
           <p className="govuk-body govuk-!-margin-bottom-0">
-            <a
-              href=""
-              onClick={handleClearFilters}
-              className="govuk-link govuk-link--no-visited-state
-                    "
-            >
+            <a href="" onClick={handleClearFilters} className="govuk-link govuk-link--no-visited-state">
               Clear all filters
             </a>
           </p>
         </div>
+
+        {/* Display applied filters if any */}
         {docTypeQuery.length > 0 || publisherQuery.length > 0 ? (
           <AppliedFilters
             documentTypeCheckedState={documentTypeCheckedState}
@@ -249,9 +316,15 @@ function App() {
         ) : (
           <hr className="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
         )}
+
+        {/* Sort selector */}
         <SortSelect sortQuery={sortQuery[0]} setSortQuery={setSortQuery} />
         <hr className="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
+
+        {/* Search results heading (visually hidden for accessibility) */}
         <h2 className="govuk-heading-l govuk-visually-hidden">Search results</h2>
+
+        {/* Display results or no results message */}
         {data.results_total_count === 0 && !isLoading ? (
           <NoResultsContent />
         ) : (
@@ -264,6 +337,7 @@ function App() {
           />
         )}
 
+        {/* Pagination controls */}
         <Pagination pageData={data} pageQuery={pageQuery[0]} setPageQuery={setPageQuery} />
       </div>
     </div>
