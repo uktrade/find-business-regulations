@@ -142,9 +142,15 @@ function App() {
     setSearchQuery([searchInput])
     setPageQuery([1]) // Reset to first page on new search
 
+    // Check if this is the first call with search input
+    const isFirstCallWithSearchInput = searchInput.length > 0 && isFirstRender.current
+
+    // Determine the sort value to use for the API call
+    const sortValue = isFirstCallWithSearchInput ? "relevance" : sortQuery[0]
+
     // Switch sort to "relevance" if a search term is entered and this is the first search
     // This ensures that the first search prioritizes relevance while preserving user sort choice afterwards
-    if (searchInput.length > 0 && isFirstRender.current) {
+    if (isFirstCallWithSearchInput) {
       setSortQuery(["relevance"])
     }
 
@@ -156,7 +162,7 @@ function App() {
       ...(searchInput.length > 0 && { search: searchInput }),
       ...(docTypeQuery.length > 0 && { document_type: docTypeQuery }),
       ...(publisherQuery.length > 0 && { publisher: publisherQuery }),
-      sort: sortQuery.join(","),
+      sort: sortValue,
       page: [1],
     }
 
