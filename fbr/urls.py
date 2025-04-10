@@ -86,8 +86,20 @@ class CacheViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["POST"])
     def build_cache(self, request):
         """
-        Build the cache by calling PublicGateway().build_cache
-        with the provided config
+        Rebuilds the application cache upon receiving a POST request.
+
+        This method triggers the cache rebuilding process and returns the
+        result.
+
+        If an exception occurs during the process, it captures the exception
+        and returns an error response along with a 500 status code.
+
+        Args:
+            request (HttpRequest): Represents the HTTP request object.
+
+        Returns:
+            Response: An HTTP response that includes the result of the cache
+            rebuild or an error message in case of failure.
         """
         try:
             cache_result = rebuild_cache()
@@ -105,8 +117,6 @@ router = routers.DefaultRouter()
 
 router.register(r"v1", DataResponseViewSet, basename="search")
 router.register(r"v1/retrieve", PublishersViewSet, basename="publishers")
-
-
 router.register(r"v1/cache", CacheViewSet, basename="cache")
 
 
