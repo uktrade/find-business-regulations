@@ -2,8 +2,6 @@ import base64
 import hashlib
 import uuid
 
-from numpy.f2py.auxfuncs import throw_error
-
 from app.search.models import DataResponseModel, logger
 
 
@@ -52,25 +50,16 @@ def insert_or_update_document(document_json):
     try:
         logger.debug("creating document...")
         logger.debug(f"document: {document_json}")
+        # with transaction.atomic():
         document = DataResponseModel(**document_json)
         document.full_clean()
         document.save()
+        return True
     except Exception as e:
         logger.error(f"error creating document: {document_json}")
         logger.error(f"error: {e}")
-        logger.debug("document already exists, updating...")
-
-        # If a duplicate key error occurs, update the existing document
-        try:
-            document = DataResponseModel.objects.get(pk=document_json["id"])
-            for key, value in document_json.items():
-                setattr(document, key, value)
-            document.save()
-            logger.debug(f"document updated: {document}")
-        except Exception as e:
-            logger.error(f"error updating document: {document_json}")
-            logger.error(f"error: {e}")
-            throw_error(f"error updating document: {document_json}")
+        logger.debug("document already exists, ignore")
+        return False
 
 
 def generate_uuid(text: str = "", short: bool = True) -> str:

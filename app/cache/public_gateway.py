@@ -94,7 +94,7 @@ class PublicGateway:
             base_url (str): The base URL of the Trade Data API.
         """
         self._base_url = (
-            "https://data.api.trade.gov.uk/v1/datasets/orp-regulations"
+            "https://data.api.trade.gov.uk/v1/datasets/uk-legislation-and-orp"
             "/versions/latest/data"
         )
 
@@ -127,9 +127,9 @@ class PublicGateway:
 
             # Now you can use `data` as a usual Python dictionary
             # Convert each row into DataResponseModel object
-            total_documents = len(data.get("uk_regulatory_documents"))
+            total_documents = len(data.get("uk_legislation_pdg"))
 
-            for row in data.get("uk_regulatory_documents"):
+            for row in data.get("uk_legislation_pdg"):
                 # Start time
                 start_time = time.time()
 
@@ -187,7 +187,9 @@ class PublicGateway:
                             )
                             continue
                         try:
-                            title = _fetch_title_from_url(config, url)
+                            # title = _fetch_title_from_url(config, url)
+
+                            title = generate_uuid(text=url, short=False)
 
                             if title is None:
                                 logger.warning(
@@ -202,7 +204,6 @@ class PublicGateway:
                             )
 
                             title = ""
-
                         related_legislation.append(
                             {
                                 "url": url,
@@ -214,12 +215,13 @@ class PublicGateway:
                 # End time
                 end_time = time.time()
                 process_related_legislation_time = end_time - start_time
-                logger.info(
+                logger.debug(
                     f"row {row["id"]} took "
                     f"{process_related_legislation_time} seconds to process"
                 )
-                insert_or_update_document(row)
-                inserted_document_count += 1
+                was_inserted = insert_or_update_document(row)
+                if was_inserted:
+                    inserted_document_count += 1
         else:
             logger.error("error fetching data from orpd: no data received")
             return 500, 0

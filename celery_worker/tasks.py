@@ -4,7 +4,6 @@ import time
 
 from celery import shared_task
 
-from app.cache.legislation import Legislation
 from app.cache.public_gateway import PublicGateway
 from app.search.config import SearchDocumentConfig
 from app.search.utils.documents import clear_all_documents
@@ -17,11 +16,6 @@ def rebuild_cache():
         clear_all_documents()
         config = SearchDocumentConfig(search_query="", timeout=120)
         config.print_to_log("celery task")
-
-        legislation_start = time.time()
-        Legislation().build_cache(config)
-        legislation_end = time.time()
-        legislation_total = legislation_end - legislation_start
 
         public_gateway_start = time.time()
         PublicGateway().build_cache(config)
