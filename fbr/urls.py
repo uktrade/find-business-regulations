@@ -13,6 +13,7 @@ from django.urls import include, path
 import app.core.views as core_views
 import app.search.views as search_views
 
+from app.cache.manage_cache import rebuild_cache
 from app.search.utils.search import get_publisher_names, search
 
 urls_logger = logging.getLogger(__name__)
@@ -61,6 +62,9 @@ class PublishersViewSet(viewsets.ViewSet):
                     "name": item["trimmed_publisher_id"],
                 }
                 for item in publishers
+                if item
+                and item.get("trimmed_publisher") is not None
+                and item.get("trimmed_publisher_id") is not None
             ]
 
             return Response(
@@ -74,11 +78,47 @@ class PublishersViewSet(viewsets.ViewSet):
             )
 
 
+class CacheViewSet(viewsets.ViewSet):
+    """
+    ViewSet for cache-related operations
+    """
+
+    @action(detail=False, methods=["POST"])
+    def build_cache(self, request):
+        """
+        Rebuilds the application cache upon receiving a POST request.
+
+        This method triggers the cache rebuilding process and returns the
+        result.
+
+        If an exception occurs during the process, it captures the exception
+        and returns an error response along with a 500 status code.
+
+        Args:
+            request (HttpRequest): Represents the HTTP request object.
+
+        Returns:
+            Response: An HTTP response that includes the result of the cache
+            rebuild or an error message in case of failure.
+        """
+        try:
+            cache_result = rebuild_cache()
+
+            return Response(cache_result, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"status": "error", "message": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
 
 router.register(r"v1", DataResponseViewSet, basename="search")
 router.register(r"v1/retrieve", PublishersViewSet, basename="publishers")
+router.register(r"v1/cache", CacheViewSet, basename="cache")
+
 
 urlpatterns = [
     path("api/", include(router.urls)),

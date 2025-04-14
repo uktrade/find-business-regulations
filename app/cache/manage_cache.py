@@ -10,7 +10,6 @@ django.setup()
 
 import time
 
-from app.cache.legislation import Legislation
 from app.cache.public_gateway import PublicGateway
 from app.search.config import SearchDocumentConfig
 from app.search.utils.documents import clear_all_documents
@@ -23,11 +22,6 @@ def rebuild_cache():
         config = SearchDocumentConfig(search_query="", timeout=120)
         config.print_to_log("non-celery task")
 
-        legislation_start = time.time()
-        Legislation().build_cache(config)
-        legislation_end = time.time()
-        legislation_total = legislation_end - legislation_start
-
         public_gateway_start = time.time()
         PublicGateway().build_cache(config)
         public_gateway_end = time.time()
@@ -38,7 +32,6 @@ def rebuild_cache():
             "message": "rebuilt cache",
             "total duration": round(end - start, 2),
             "details": {
-                "legislation": round(legislation_total, 2),
                 "public_gateway": round(public_gateway_total, 2),
             },
         }

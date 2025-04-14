@@ -6,10 +6,7 @@ import time
 from bs4 import BeautifulSoup
 
 from app.search.utils.date import convert_date_string_to_obj
-from app.search.utils.documents import (  # noqa: E501
-    generate_uuid,
-    insert_or_update_document,
-)
+from app.search.utils.documents import insert_or_update_document  # noqa: E501
 from app.search.utils.retrieve_data import get_data_from_url
 
 logger = logging.getLogger(__name__)
@@ -94,12 +91,12 @@ class PublicGateway:
             base_url (str): The base URL of the Trade Data API.
         """
         self._base_url = (
-            "https://data.api.trade.gov.uk/v1/datasets/orp-regulations"
+            "https://data.api.trade.gov.uk/v1/datasets/uk-business-regulations"
             "/versions/latest/data"
         )
 
     def build_cache(self, config):
-        logger.info("fetching all data from orpd...")
+        logger.info("fetching all data from public gateway...")
 
         # URL encode the query for the API request
         params = {"format": "json"}
@@ -117,7 +114,7 @@ class PublicGateway:
         initial_request_system_time = end_time - start_time
 
         logger.debug(
-            f"fetching all data from orpd took "
+            f"fetching all data from public gateway took "
             f"{initial_request_system_time} seconds"
         )
 
@@ -127,9 +124,9 @@ class PublicGateway:
 
             # Now you can use `data` as a usual Python dictionary
             # Convert each row into DataResponseModel object
-            total_documents = len(data.get("uk_regulatory_documents"))
+            total_documents = len(data.get("uk_legislation_pdg"))
 
-            for row in data.get("uk_regulatory_documents"):
+            for row in data.get("uk_legislation_pdg"):
                 # Start time
                 start_time = time.time()
 
@@ -158,9 +155,10 @@ class PublicGateway:
 
                 row["sort_date"] = row["date_valid"]
 
-                row["id"] = generate_uuid(
-                    text=row.get("identifier", "").lower()
-                )
+                row["id"] = row.get("uuid", "")
+
+                # Remove uuid from row
+                row.pop("uuid", None)
 
                 row["publisher_id"] = (
                     None
@@ -172,54 +170,26 @@ class PublicGateway:
                     )
                 )
 
-                # Process related_legislation field
-                if row.get("related_legislation"):
-                    related_legislation_urls = row[
-                        "related_legislation"
-                    ].split("\n")
+                row["related_legislation"] = row.get(
+                    "related_legislation_dict"
+                )
 
-                    related_legislation = []
-                    for url in related_legislation_urls:
-                        if url == "":
-                            logger.warning(
-                                f"empty URL found in related_legislation "
-                                f"for row {row["id"]}. skipping..."
-                            )
-                            continue
-                        try:
-                            title = _fetch_title_from_url(config, url)
+                # Remove related_legislation_dict from row
+                row.pop("related_legislation_dict", None)
 
-                            if title is None:
-                                logger.warning(
-                                    f"no title found for {url}. "
-                                    f"title set to empty string"
-                                )
-                                title = ""
-                        except Exception as e:
-                            logger.error(
-                                f"(fetch title from url) error fetching "
-                                f"title from {url}: {e}"
-                            )
-
-                            title = ""
-
-                        related_legislation.append(
-                            {
-                                "url": url,
-                                "title": title if title != "" else url,
-                            }
-                        )
-                    row["related_legislation"] = related_legislation
-
-                # End time
                 end_time = time.time()
                 process_related_legislation_time = end_time - start_time
-                logger.info(
+                logger.debug(
                     f"row {row["id"]} took "
                     f"{process_related_legislation_time} seconds to process"
                 )
-                insert_or_update_document(row)
-                inserted_document_count += 1
+                was_inserted = insert_or_update_document(row)
+                if was_inserted:
+                    inserted_document_count += 1
+                else:
+                    logger.error(
+                        f"error inserting or updating document: {row}"
+                    )
         else:
             logger.error("error fetching data from orpd: no data received")
             return 500, 0
