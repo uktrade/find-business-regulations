@@ -56,16 +56,47 @@ class PublishersViewSet(viewsets.ViewSet):
         try:
             publishers = get_publisher_names()
 
-            results = [
-                {
-                    "label": item["trimmed_publisher"],
-                    "name": item["trimmed_publisher_id"],
-                }
-                for item in publishers
-                if item
-                and item.get("trimmed_publisher") is not None
-                and item.get("trimmed_publisher_id") is not None
-            ]
+            # Separate standard/guidance from legislation items
+            standard_guidance_results = []
+            legislation_items = []
+
+            for item in publishers:
+                if (
+                    item
+                    and item.get("trimmed_publisher") is not None
+                    and item.get("trimmed_publisher_id") is not None
+                ):
+
+                    label = item["trimmed_publisher"].lower()
+                    if "standard" in label or "guidance" in label:
+                        # Add standard/guidance items individually
+                        standard_guidance_results.append(
+                            {
+                                "label": item["trimmed_publisher"],
+                                "name": item["trimmed_publisher_id"],
+                            }
+                        )
+                    else:
+                        # Add legislation items to a separate list
+                        legislation_items.append(
+                            {
+                                "label": item["trimmed_publisher"],
+                                "name": item["trimmed_publisher_id"],
+                            }
+                        )
+
+            # Combine results, with legislation items grouped under one object
+            results = standard_guidance_results
+
+            # Add legislation category with all legislation items
+            if legislation_items:
+                results.append(
+                    {
+                        "label": "Legislation",
+                        "name": "legislation",
+                        "items": legislation_items,
+                    }
+                )
 
             return Response(
                 data={"results": results},
