@@ -74,7 +74,8 @@ class DocumentTypesViewSet(viewsets.ViewSet):
                         word.capitalize() for word in doc_type.split()
                     )
 
-                # For camel case, insert spaces before capital letters and capitalize first letter
+                # For camel case, insert spaces before capital letters and
+                # capitalize first letter
                 formatted = re.sub(r"(?<!^)(?=[A-Z])", " ", doc_type)
                 return formatted
 
