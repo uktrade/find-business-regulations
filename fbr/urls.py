@@ -50,6 +50,84 @@ class DataResponseViewSet(viewsets.ViewSet):
             )
 
 
+class DocumentTypesViewSet(viewsets.ViewSet):
+    @action(detail=False, methods=["get"], url_path="document-types")
+    def document_types(self, request, *args, **kwargs):
+        try:
+            import re
+
+            from django.db.models import F
+            from django.db.models.functions import Trim
+
+            from app.search.models import DataResponseModel
+
+            def format_document_type(doc_type):
+                """
+                Format document type string:
+                1. For camel case strings (like EuropeanUnionDecision),
+                   insert spaces between words
+                2. For strings with spaces, capitalize each word
+                """
+                # If already contains spaces, just capitalize each word
+                if " " in doc_type:
+                    return " ".join(
+                        word.capitalize() for word in doc_type.split()
+                    )
+
+                # For camel case, insert spaces before capital letters and
+                # capitalize first letter
+                formatted = re.sub(r"(?<!^)(?=[A-Z])", " ", doc_type)
+                return formatted
+
+            # Get all distinct document types from the DataResponseModel
+            document_types = (
+                DataResponseModel.objects.values(doc_type=Trim(F("type")))
+                .filter(type__isnull=False)
+                .exclude(type__exact="")
+                .distinct()
+                .order_by("doc_type")
+            )
+
+            # Categorize document types
+            non_legislation = []
+            legislation = []
+
+            for item in document_types:
+                if item and item.get("doc_type") is not None:
+                    doc_type = item["doc_type"]
+                    formatted_type = format_document_type(doc_type)
+                    display_item = {
+                        "label": formatted_type,
+                        "name": doc_type,
+                    }
+
+                    if (
+                        "standard" in doc_type.lower()
+                        or "guidance" in doc_type.lower()
+                    ):
+                        # Add to non-legislation
+                        non_legislation.append(display_item)
+                    else:
+                        # Add to legislation
+                        legislation.append(display_item)
+
+            # Create the response payload
+            response_data = {
+                "non-legislation": non_legislation,
+                "legislation": legislation,
+            }
+
+            return Response(
+                data=response_data,
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response(
+                data={"message": f"error fetching document types: {e}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
 class PublishersViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["get"], url_path="publishers")
     def publishers(self, request, *args, **kwargs):
@@ -117,6 +195,9 @@ router = routers.DefaultRouter()
 
 router.register(r"v1", DataResponseViewSet, basename="search")
 router.register(r"v1/retrieve", PublishersViewSet, basename="publishers")
+router.register(
+    r"v1/retrieve", DocumentTypesViewSet, basename="document-types"
+)
 router.register(r"v1/cache", CacheViewSet, basename="cache")
 
 
