@@ -16,6 +16,7 @@ from django.http import HttpRequest
 from app.search.config import SearchDocumentConfig
 from app.search.models import DataResponseModel
 from app.search.utils.calculate_score import calculate_score
+from app.search.utils.documents import document_type_groups
 from app.search.utils.paginate import paginate
 
 logger = logging.getLogger(__name__)
@@ -267,6 +268,23 @@ def search(
 
     search_query = request.GET.get("query", request.GET.get("search", ""))
     document_types = request.GET.getlist("document_type", [])
+
+    if "legislation" in document_types:
+        legislation, _ = document_type_groups()
+        # Create a set from document_types for O(1) lookups
+        existing_types = set(document_types)
+
+        # Filter and extend in one operation instead of checking and appending one by one
+        new_types = [
+            item.get("name")
+            for item in legislation
+            if item.get("name") is not None
+            and item.get("name") not in existing_types
+        ]
+
+        # Add all new types at once
+        document_types.extend(new_types)
+
     offset = request.GET.get("page", "1")
     offset = int(offset) if offset.isdigit() else 1
     limit = request.GET.get("limit", "10")
