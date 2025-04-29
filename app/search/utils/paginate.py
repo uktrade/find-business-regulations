@@ -6,6 +6,7 @@ from django.db.models import QuerySet
 
 from app.search.config import SearchDocumentConfig
 from app.search.utils.date import format_partial_date_govuk
+from app.search.utils.documents import document_type_groups
 
 logger = logging.getLogger(__name__)
 
@@ -97,14 +98,36 @@ def paginate(
 
     # Convert paginated_documents into a list of json objects
     paginated_documents_json = []
+
+    legislation_types, non_legislation_types = document_type_groups()
     for paginated_document in paginated_documents:
+        ptype = paginated_document.type
+        label_type = ""
+
+        # First check in legislation_types
+        for item in legislation_types:
+            if item.get("name") == ptype:
+                label_type = item.get("label")
+                break
+
+        # If not found in legislation_types, check in non_legislation_types
+        if not label_type:
+            for item in non_legislation_types:
+                if item.get("name") == ptype:
+                    label_type = item.get("label")
+                    break
+
+        # If still not found, use the original type
+        if not label_type:
+            label_type = ptype
+
         paginated_documents_json.append(
             {
                 "id": paginated_document.id,
                 "title": paginated_document.title,
                 "publisher": paginated_document.publisher,
                 "description": paginated_document.description,
-                "type": paginated_document.type,
+                "type": label_type,
                 "source_date_modified": format_partial_date_govuk(
                     paginated_document.source_date_modified
                 ),

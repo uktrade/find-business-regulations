@@ -5,6 +5,62 @@ import uuid
 from app.search.models import DataResponseModel, logger
 
 
+def document_type_groups():
+    import re
+
+    from django.db.models import F
+    from django.db.models.functions import Trim
+
+    from app.search.models import DataResponseModel
+
+    def format_document_type(doc_type):
+        """
+        Format document type string:
+        1. For camel case strings (like EuropeanUnionDecision),
+           insert spaces between words
+        2. For strings with spaces, capitalize each word
+        """
+        # If already contains spaces, just capitalize each word
+        if " " in doc_type:
+            return " ".join(word.capitalize() for word in doc_type.split())
+
+        # For camel case, insert spaces before capital letters and
+        # capitalize first letter
+        formatted = re.sub(r"(?<!^)(?=[A-Z])", " ", doc_type)
+        return formatted
+
+    # Get all distinct document types from the DataResponseModel
+    document_types = (
+        DataResponseModel.objects.values(doc_type=Trim(F("type")))
+        .filter(type__isnull=False)
+        .exclude(type__exact="")
+        .distinct()
+        .order_by("doc_type")
+    )
+    # Categorize document types
+    non_legislation = []
+    legislation = []
+    for item in document_types:
+        if item and item.get("doc_type") is not None:
+            doc_type = item["doc_type"]
+            formatted_type = format_document_type(doc_type)
+            display_item = {
+                "label": formatted_type,
+                "name": doc_type,
+            }
+
+            if (
+                "standard" in doc_type.lower()
+                or "guidance" in doc_type.lower()
+            ):
+                # Add to non-legislation
+                non_legislation.append(display_item)
+            else:
+                # Add to legislation
+                legislation.append(display_item)
+    return legislation, non_legislation
+
+
 def clear_all_documents():
     """
     Clears all documents from the 'DataResponseModel' table in the database.
