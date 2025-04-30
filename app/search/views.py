@@ -10,6 +10,7 @@ from django.views.decorators.http import require_http_methods
 
 from app.core.forms import RegulationSearchForm
 from app.search.config import SearchDocumentConfig
+from app.search.utils.documents import document_type_groups
 from app.search.utils.search import search, search_database
 
 logger = logging.getLogger(__name__)
@@ -63,7 +64,32 @@ def document(request: HttpRequest, id) -> HttpResponse:
                 request, template_name="page_not_found.html", context=context
             )
 
-        context["result"] = queryset.first()
+        result = queryset.first()
+
+        legislation_types, non_legislation_types = document_type_groups()
+        ptype = result.type
+        label_type = ""
+
+        # First check in legislation_types
+        for item in legislation_types:
+            if item.get("name") == ptype:
+                label_type = item.get("label")
+                break
+
+        # If not found in legislation_types, check in non_legislation_types
+        if not label_type:
+            for item in non_legislation_types:
+                if item.get("name") == ptype:
+                    label_type = item.get("label")
+                    break
+
+        # If still not found, use the original type
+        if not label_type:
+            label_type = ptype
+
+        result.type = label_type
+
+        context["result"] = result
         context["result"].regulatory_topics = context[
             "result"
         ].regulatory_topics.split("\n")
