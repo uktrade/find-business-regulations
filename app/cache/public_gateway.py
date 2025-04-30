@@ -82,6 +82,40 @@ def _fetch_title_from_url(config, url):
     return ""
 
 
+def rectify_malformed_json_to_list(input_string):
+    """
+    Convert a malformed JSON-like string to valid JSON.
+
+    Args:
+        input_string (str): The malformed JSON-like string to convert
+        output_file (str, optional): Path to save the JSON file.
+        If None, file is not saved.
+
+    Returns:
+        str: The valid JSON string
+    """
+    # Clean the string and prepare for parsing
+    input_string = input_string.strip()
+    items = re.findall(r"\{([^}]+)\}", input_string)
+
+    # Parse each item into a proper dictionary
+    result = []
+    for item in items:
+        # Split by comma, but only outside of quotes
+        parts = [p.strip() for p in item.split(",")]
+        obj = {}
+
+        for part in parts:
+            if ":" in part:
+                key, value = part.split(":", 1)
+                key = key.strip()
+                value = value.strip()
+                obj[key] = value
+
+        result.append(obj)
+    return result
+
+
 class PublicGateway:
     def __init__(self):
         """
@@ -170,9 +204,13 @@ class PublicGateway:
                     )
                 )
 
-                row["related_legislation"] = row.get(
-                    "related_legislation_dict"
+                corrected_related_legislation = rectify_malformed_json_to_list(
+                    row.get("related_legislation_dict")
                 )
+                corrected_related_legislation_json = json.dumps(
+                    corrected_related_legislation
+                )
+                row["related_legislation"] = corrected_related_legislation_json
 
                 # Remove related_legislation_dict from row
                 row.pop("related_legislation_dict", None)
