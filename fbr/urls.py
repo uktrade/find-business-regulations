@@ -144,7 +144,10 @@ router.register(r"v1/retrieve", PublishersViewSet, basename="publishers")
 router.register(
     r"v1/retrieve", DocumentTypesViewSet, basename="document-types"
 )
-router.register(r"v1/cache", CacheViewSet, basename="cache")
+
+# Only enable this if you want to rebuild cache as endpoint i.e.
+# POST https://127.0.0.1:8000/api/v1/cache/build_cache/
+# router.register(r"v1/cache", CacheViewSet, basename="cache")
 
 
 urlpatterns = [
