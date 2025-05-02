@@ -163,3 +163,50 @@ def generate_uuid(text: str = "", short: bool = True) -> str:
         :22
     ]  # Shorten as needed, typically more than 22 characters are
     # unnecessary and remain unique.
+
+
+def validate_related_legislation(related_legislation_json):
+    """
+    Validates the structure and data of the `related_legislation_json` to
+    ensure it adheres to the required format. The function checks for the
+    following:
+    - The input is a list.
+    - Each item in the list is a dictionary.
+    - Each dictionary contains the keys 'title' and 'url' with valid
+    string values.
+
+    Parameters:
+    related_legislation_json : list
+        The input data to be validated. Expected to be a list of dictionaries,
+        where each dictionary represents related legislation with mandatory
+        'title' and 'url' fields.
+
+    Returns:
+    tuple[bool, str | None]
+        A tuple where the first element is a boolean indicating whether the
+        validation is successful, and the second element is either None (if
+        validation passes) or a string containing an error message (if
+        validation fails).
+    """
+    if not isinstance(related_legislation_json, list):
+        return False, "Related legislation must be a list"
+
+    for index, item in enumerate(related_legislation_json):
+        if not isinstance(item, dict):
+            return False, f"Item at index {index} is not a dictionary"
+
+        # Check for title
+        if "title" not in item:
+            return False, f"Item at index {index} is missing 'title' field"
+
+        if not item["title"] or not isinstance(item["title"], str):
+            return False, f"Item at index {index} has invalid 'title' value"
+
+        # Check for url
+        if "url" not in item:
+            return False, f"Item at index {index} is missing 'url' field"
+
+        if not item["url"] or not isinstance(item["url"], str):
+            return False, f"Item at index {index} has invalid 'url' value"
+
+    return True, None

@@ -10,7 +10,10 @@ from django.views.decorators.http import require_http_methods
 
 from app.core.forms import RegulationSearchForm
 from app.search.config import SearchDocumentConfig
-from app.search.utils.documents import document_type_groups
+from app.search.utils.documents import (
+    document_type_groups,
+    validate_related_legislation,
+)
 from app.search.utils.search import search, search_database
 
 logger = logging.getLogger(__name__)
@@ -90,9 +93,12 @@ def document(request: HttpRequest, id) -> HttpResponse:
         result.type = label_type
 
         context["result"] = result
-        context["result"].regulatory_topics = context[
-            "result"
-        ].regulatory_topics.split("\n")
+
+        if context["result"].regulatory_topics is not None:
+            context["result"].regulatory_topics = context[
+                "result"
+            ].regulatory_topics.split("\n")
+
         context["status_code"] = http.HTTPStatus.OK
 
         # Parse the related_legislation field
@@ -103,9 +109,23 @@ def document(request: HttpRequest, id) -> HttpResponse:
                 related_legislation_json = json.loads(
                     related_legislation_str.replace("'", '"')
                 )
-                context["result"].related_legislation = (
-                    related_legislation_json
+
+                is_valid_related_legislation, err_msg = (
+                    validate_related_legislation(related_legislation_json)
                 )
+
+                if is_valid_related_legislation:
+                    if len(related_legislation_json) > 0:
+                        context["result"].related_legislation = (
+                            related_legislation_json
+                        )
+                    else:
+                        context["result"].related_legislation = None
+                else:
+                    logger.error(
+                        f"related legislation validation error: {err_msg}"
+                    )
+                    context["result"].related_legislation = None
             except json.JSONDecodeError as e:
                 logger.error(f"JSON decoding error: {e}")
                 context["error"] = f"error fetching details: {e}"
