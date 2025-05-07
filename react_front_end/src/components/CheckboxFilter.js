@@ -36,13 +36,13 @@ function CheckboxFilter({
           checkboxGroupName={checkboxGroupName}
         />
       ) : null}
-      <div
-        className={`govuk-checkboxes govuk-checkboxes--small fbr-checkbox-filters ${withSearch ? "fbr-max-height-350 fbr-scrollbars-visible" : ""}`}
+      <ul
+        className={`govuk-list govuk-checkboxes govuk-checkboxes--small fbr-checkbox-filters ${withSearch ? "fbr-max-height-350 fbr-scrollbars-visible" : ""}`}
         data-module="govuk-checkboxes"
         id={`${withSearch ? `${checkboxGroupName}-autocomplete-list` : `${checkboxGroupName}-list`}`}
       >
         {filteredData.map(({ name, label }, index) => (
-          <div className="govuk-checkboxes__item" key={name}>
+          <li className="govuk-checkboxes__item" key={name}>
             <input
               className="govuk-checkboxes__input"
               type="checkbox"
@@ -56,9 +56,9 @@ function CheckboxFilter({
             <label className="govuk-label govuk-checkboxes__label" htmlFor={`checkbox-${name}`} id={`label-${name}`}>
               {label}
             </label>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </>
   )
 }
