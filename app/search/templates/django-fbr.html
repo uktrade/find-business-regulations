@@ -222,9 +222,9 @@
                 <div class="govuk-grid-column-full">
                   {% if results %}
                   <h2 class="govuk-heading-l govuk-visually-hidden">Search results</h2>
-                  <div class="govuk-summary-list fbr-search-results">
+                  <ul class="govuk-list govuk-summary-list fbr-search-results">
                     {% for result in results %}
-                    <div class="govuk-summary-list__row--no-border">
+                    <li class="govuk-summary-list__row--no-border">
                       <span class="govuk-caption-m">{{ result.type }}</span>
                       <h2 class="govuk-heading-m">
                         <a href="/document/{{ result.id }}" class="govuk-link">
@@ -251,10 +251,10 @@
                         <li class="govuk-body-s fbr-secondary-text-colour">{{ topic }}</li>
                         {% endfor %}
                       </ul>
-                    </div>
+                    </li>
                     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
                     {% endfor %}
-                  </div>
+                  </ul>
                   {% if is_paginated %}
                   <nav class="govuk-pagination" role="navigation" aria-label="Pagination">
                     {% if paginated_document_results.has_previous %}
