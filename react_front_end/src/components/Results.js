@@ -59,11 +59,11 @@ function Results({ results, isLoading, searchQuery = "", publishers, onPublisher
         return (
           <div className="govuk-summary-list__row--no-border" key={id}>
             <span className="govuk-caption-m">{type}</span>
-            <h2 className="govuk-heading-m">
+            <h3 className="govuk-heading-m">
               <a href={`/document/${id}`} className="govuk-link">
                 {title}
               </a>
-            </h2>
+            </h3>
             <p className="govuk-body">{highlightedDescription}</p>
             <p className="govuk-body-s fbr-secondary-text-colour govuk-!-margin-bottom-2">
               Published by:{" "}
