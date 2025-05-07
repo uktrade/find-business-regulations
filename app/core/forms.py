@@ -129,7 +129,7 @@ class EmailForm(forms.Form):
             }
         ),
         error_messages={
-            "required": "Enter an email address in the correct format",
-            "invalid": "Enter an email address in the correct format",
+            "required": "Enter an email address in the correct format, like name@example.com",  # noqa: E501
+            "invalid": "Enter an email address in the correct format, like name@example.com",  # noqa: E501
         },
     )
