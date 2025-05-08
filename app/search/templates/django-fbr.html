@@ -222,7 +222,7 @@
                 <div class="govuk-grid-column-full">
                   {% if results %}
                   <h2 class="govuk-heading-l govuk-visually-hidden">Search results</h2>
-                  <ul class="govuk-list govuk-summary-list fbr-search-results">
+                  <ol class="govuk-list govuk-summary-list fbr-search-results">
                     {% for result in results %}
                     <li class="govuk-summary-list__row--no-border">
                       <span class="govuk-caption-m">{{ result.type }}</span>
@@ -254,7 +254,7 @@
                     </li>
                     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
                     {% endfor %}
-                  </ul>
+                  </ol>
                   {% if is_paginated %}
                   <nav class="govuk-pagination" role="navigation" aria-label="Pagination">
                     {% if paginated_document_results.has_previous %}

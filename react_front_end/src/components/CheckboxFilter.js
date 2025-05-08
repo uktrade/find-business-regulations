@@ -71,7 +71,7 @@ function SearchCheckboxes({ searchQuery, setSearchQuery, checkboxGroupName }) {
   return (
     <div className="govuk-form-group search-group">
       <label className="govuk-label govuk-visually-hidden" htmlFor={`${checkboxGroupName}-autocomplete`}>
-        Search by {checkboxGroupName}
+        Published by - search {checkboxGroupName}
       </label>
       <div className="search-input-button search-input-button--black fbr-publisher-search">
         <input
@@ -86,6 +86,7 @@ function SearchCheckboxes({ searchQuery, setSearchQuery, checkboxGroupName }) {
           aria-autocomplete="list"
           aria-controls={`${checkboxGroupName}-autocomplete-list`}
           aria-expanded="true"
+          aria-label={`Published by - search ${checkboxGroupName}`}
         />
       </div>
     </div>

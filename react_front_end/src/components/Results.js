@@ -46,7 +46,7 @@ function Results({ results, isLoading, searchQuery = "", publishers, onPublisher
   }
 
   return results ? (
-    <ul className="govuk-list govuk-summary-list fbr-search-results">
+    <ol className="govuk-list govuk-summary-list fbr-search-results">
       {results.map((result) => {
         const { id, type, title, description, publisher, source_date_modified, source_date_issued, regulatory_topics } =
           result
@@ -86,7 +86,7 @@ function Results({ results, isLoading, searchQuery = "", publishers, onPublisher
           </li>
         )
       })}
-    </ul>
+    </ol>
   ) : null
 }
 
