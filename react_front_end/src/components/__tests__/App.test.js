@@ -13,12 +13,13 @@ jest.mock("../../components/Search", () => ({
     </div>
   ),
 }))
-jest.mock("../../components/CheckboxFilter", () => ({
-  CheckboxFilter: ({ checkboxData, checkedState, setCheckedState, setQueryParams, withSearch, setIsLoading }) => (
+jest.mock("../../components/DocTypeFilters", () => ({
+  DocTypeFilters: ({ checkboxData, checkedState, setCheckedState, setQueryParams, setIsLoading }) => (
     <div>
       {checkboxData.map((item, index) => (
-        <label key={item.name}>
+        <div key={item.name}>
           <input
+            id={`checkbox-${item.name}`}
             type="checkbox"
             checked={checkedState[index]}
             onChange={() => {
@@ -29,8 +30,8 @@ jest.mock("../../components/CheckboxFilter", () => ({
               setIsLoading(true)
             }}
           />
-          {item.label}
-        </label>
+          <label htmlFor={`checkbox-${item.name}`}>{item.label}</label>
+        </div>
       ))}
     </div>
   ),
@@ -93,13 +94,13 @@ describe("App", () => {
     await waitFor(() => {
       expect(fetchData).toHaveBeenCalledWith({
         search: "test",
-        sort: "recent",
+        sort: "relevance",
         page: [1],
       })
     })
   })
 
-  test("handles filter changes", async () => {
+  test("handles document type filter changes", async () => {
     await waitFor(() => {
       render(<App />)
     })
@@ -108,8 +109,8 @@ describe("App", () => {
     await waitFor(() => {
       expect(fetchData).toHaveBeenCalledWith({
         search: "test",
+        sort: "relevance",
         document_type: ["legislation"],
-        sort: "recent",
         page: [1],
       })
     })
@@ -124,8 +125,8 @@ describe("App", () => {
     await waitFor(() => {
       expect(fetchData).toHaveBeenCalledWith({
         search: "test",
+        sort: "relevance",
         document_type: ["legislation"],
-        sort: "recent",
         page: [2],
       })
     })
@@ -140,8 +141,8 @@ describe("App", () => {
     await waitFor(() => {
       expect(fetchData).toHaveBeenCalledWith({
         search: "test",
-        document_type: ["legislation"],
         sort: "relevance",
+        document_type: ["legislation"],
         page: [2],
       })
     })
