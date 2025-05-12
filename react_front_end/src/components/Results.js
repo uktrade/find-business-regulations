@@ -46,7 +46,7 @@ function Results({ results, isLoading, searchQuery = "", publishers, onPublisher
   }
 
   return results ? (
-    <div className="govuk-summary-list fbr-search-results">
+    <ol className="govuk-list govuk-summary-list fbr-search-results">
       {results.map((result) => {
         const { id, type, title, description, publisher, source_date_modified, source_date_issued, regulatory_topics } =
           result
@@ -57,13 +57,13 @@ function Results({ results, isLoading, searchQuery = "", publishers, onPublisher
         const highlightedDescription = description ? truncateAndHighlightDescription(description) : ""
 
         return (
-          <div className="govuk-summary-list__row--no-border" key={id}>
+          <li className="govuk-summary-list__row--no-border" key={id}>
             <span className="govuk-caption-m">{type}</span>
-            <h2 className="govuk-heading-m">
+            <h3 className="govuk-heading-m">
               <a href={`/document/${id}`} className="govuk-link">
                 {title}
               </a>
-            </h2>
+            </h3>
             <p className="govuk-body">{highlightedDescription}</p>
             <p className="govuk-body-s fbr-secondary-text-colour govuk-!-margin-bottom-2">
               Published by:{" "}
@@ -83,10 +83,10 @@ function Results({ results, isLoading, searchQuery = "", publishers, onPublisher
               <ul className="govuk-list fbr-topics-list">{renderRegulatoryTopics(regulatory_topics, searchQuery)}</ul>
             ) : null}
             <hr className="govuk-section-break govuk-section-break--l govuk-section-break--visible" />
-          </div>
+          </li>
         )
       })}
-    </div>
+    </ol>
   ) : null
 }
 

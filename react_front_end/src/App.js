@@ -4,7 +4,8 @@ import { fetchData } from "./utils/fetch-drf"
 import { DOCUMENT_TYPES, PUBLISHERS_URL } from "./utils/constants"
 
 import { Search } from "./components/Search"
-import { CheckboxFilter } from "./components/CheckboxFilter"
+import { DocTypeFilters } from "./components/DocTypeFilters"
+import { PublisherFilters } from "./components/PublisherFilters"
 import { AppliedFilters } from "./components/AppliedFilters"
 import { Results } from "./components/Results"
 import { Pagination } from "./components/Pagination"
@@ -242,7 +243,7 @@ function App() {
             <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">
               <h2 className="govuk-fieldset__heading">Document type</h2>
             </legend>
-            <CheckboxFilter
+            <DocTypeFilters
               checkboxGroupName="document_type"
               checkboxData={DOCUMENT_TYPES}
               checkedState={documentTypeCheckedState}
@@ -260,7 +261,7 @@ function App() {
               <h2 className="govuk-fieldset__heading">Published by</h2>
             </legend>
             {publishers ? (
-              <CheckboxFilter
+              <PublisherFilters
                 checkboxGroupName="publishers"
                 checkboxData={publishers}
                 checkedState={publisherCheckedState}
