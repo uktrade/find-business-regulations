@@ -10,6 +10,7 @@ function PublisherFilters({
 }) {
   const [searchQuery, setSearchQuery] = useState("")
   const [filteredData, setFilteredData] = useState(checkboxData)
+  const [highlightedIndex, setHighlightedIndex] = useState(-1) // Tracks the highlighted option
 
   useEffect(() => {
     setFilteredData(
@@ -29,8 +30,6 @@ function PublisherFilters({
     setQueryParams(checkedItems)
     setCheckedState(updatedCheckedState)
   }
-
-  const [highlightedIndex, setHighlightedIndex] = useState(-1) // Tracks the highlighted option
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value)

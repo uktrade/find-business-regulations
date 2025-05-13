@@ -23,6 +23,12 @@
   }
 }
 
+.fbr-checkbox-filters {
+  .highlighted {
+    background-color: govuk-colour("light-grey");
+  }
+}
+
 .fbr-publisher-search {
   .fbr-publisher-search__input {
     position: relative;
@@ -43,4 +49,61 @@
     //   background-image: _search-icon($colour: govuk-colour("white"));
     // }
   }
+}
+
+// Ensure scrollbars are always visible
+.fbr-scrollbars-visible {
+  overflow-y: auto; /* Show vertical scrollbars when needed */
+  overflow-x: hidden; /* Hide horizontal scrollbars */
+
+  -ms-overflow-style: scrollbar;
+
+  &::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 12px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 6px;
+    background-color: govuk-colour("dark-grey");
+    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+  }
+
+  &::-webkit-scrollbar-track {
+    border-radius: 6px;
+    background: govuk-colour("light-grey");
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, .8);
+  }
+
+  &::-webkit-scrollbar-thumb:active {
+    background: rgba(0, 0, 0, .6);
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: govuk-colour("light-grey");
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  &::-webkit-scrollbar-track-piece {
+    display: none;
+  }
+
+  &::-webkit-scrollbar-corner {
+    display: none;
+  }
+
+  &::-webkit-resizer {
+    display: none;
+  }
+
+}
+
+.fbr-max-height-350 {
+  max-height: 350px;
 }
